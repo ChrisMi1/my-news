@@ -1,12 +1,14 @@
 package com.techie.mynews.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "user_sources")
 public class UserSource extends BaseEntity{
@@ -15,11 +17,11 @@ public class UserSource extends BaseEntity{
     @Column(name = "id", insertable = false, updatable = false)
     private String id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_id")
     private Source source;
 }

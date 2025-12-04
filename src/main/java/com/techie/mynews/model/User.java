@@ -1,12 +1,13 @@
 package com.techie.mynews.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,4 +22,9 @@ public class User extends BaseEntity {
     @Column(name = "user_email",length = 500)
     private String email;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_sources", joinColumns = {
+            @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
+            @JoinColumn(name = "source_id", referencedColumnName = "id") })
+    private List<Source> sources;
 }

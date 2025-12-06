@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useMsal } from "@azure/msal-react";
+import { useEffect, useState } from "react";
+import Login from "./pages/Login.jsx";
+import { useToken } from "./useToken";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const { accounts } = useMsal();
+    const { token, loading: tokenLoading, error: tokenError } = useToken();
+    const [userState, setUserState] = useState({ status: "loading" });
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    
+    useEffect(() => {
+        
+        if (!accounts || accounts.length === 0) return;
+        if (!token || tokenLoading) return;
+
+        const account = accounts[0];
+
+        const checkUser = async () => {
+            try {
+                const res = await fetch("http://localhost:8080/mynews/api/users/check", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ email: account.username })
+                });
+
+                const data = await res.json();
+
+                if (data.exists) {
+                    setUserState({ status: "existingUser", user: data.user });
+                } else {
+                    setUserState({ status: "newUser", user: { email: account.username } });
+                }
+            } catch (err) {
+                console.error("Error checking user:", err);
+                setUserState({ status: "error" });
+            }
+        };
+
+        checkUser();
+    }, [accounts, token, tokenLoading]);
+
+    // --- RENDER ---
+    if (!accounts || accounts.length === 0) return <Login />; // User not logged in
+    if (tokenLoading || userState.status === "loading") return <div>Loading...</div>;
+    if (tokenError || userState.status === "error") return <div>Error occurred</div>;
+    if (userState.status === "newUser") return <div>New user...</div>;
+    if (userState.status === "existingUser") return <div>Existing user...</div>;
+
+    return <Login />; // fallback
 }
 
-export default App
+export default App;

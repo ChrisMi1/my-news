@@ -1,8 +1,11 @@
 package com.techie.mynews.service;
 
 import com.techie.mynews.dto.request.UserSourceRequest;
+import com.techie.mynews.dto.response.CheckUserResponse;
+import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.exception.MyNewsException;
+import com.techie.mynews.mapper.UserMapper;
 import com.techie.mynews.mapper.UserSourceMapper;
 import com.techie.mynews.model.Source;
 import com.techie.mynews.model.User;
@@ -15,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,13 +29,12 @@ public class UserService {
     private final SourceRepository sourceRepository;
     private final UserSourceRepository userSourceRepository;
     private final UserSourceMapper userSourceMapper;
-    public List<UserSourceResponse> saveSources(Jwt jwt, UserSourceRequest userSourceRequest) {
-        String email = jwt.getClaimAsString("preferred_username");
-        User user = userRepository.findUserByEmail(email);
+    private final UserMapper userMapper;
+    public List<UserSourceResponse> saveSources(UserSourceRequest userSourceRequest) {
+        User user = userRepository.findUserByEmail(userSourceRequest.getEmail());
 
         if (user == null) {
-            log.info("User doesn't exist in our db. Continue with creation...");
-            user = saveUser(email);
+            throw new MyNewsException(HttpStatus.BAD_REQUEST,"User with email " + userSourceRequest.getEmail() + " not found.");
         }
 
         List<Source> sources = mapSourceIdsToSources(userSourceRequest.getSourcesIds());
@@ -68,5 +69,28 @@ public class UserService {
         User user = new User();
         user.setEmail(email);
         return userRepository.save(user);
+    }
+
+    public CheckUserResponse checkIfUserExists(String email) {
+        log.info("Checking if user exists with email: " + email);
+        User user = userRepository.findUserByEmail(email);
+        CheckUserResponse checkUserResponse = new CheckUserResponse();
+
+        if (user == null) {
+            checkUserResponse.setExists(false);
+            checkUserResponse.setUserResponse(null);
+            return checkUserResponse;
+        }
+
+        UserResponse userResponse = userMapper.entityToResponse(user);
+        checkUserResponse.setExists(true);
+        checkUserResponse.setUserResponse(userResponse);
+
+        return checkUserResponse;
+    }
+
+    public UserResponse create(String email) {
+        User user = saveUser(email);
+        return userMapper.entityToResponse(user);
     }
 }

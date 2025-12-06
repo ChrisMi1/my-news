@@ -6,8 +6,7 @@ import lombok.experimental.Accessors;
 
 
 public record UserRequest(
-        String categories,
-        String sources
+        String email
 ) {
 
 }

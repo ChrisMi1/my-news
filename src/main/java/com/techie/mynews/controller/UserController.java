@@ -1,6 +1,5 @@
 package com.techie.mynews.controller;
 
-import com.techie.mynews.dto.request.CheckUserRequest;
 import com.techie.mynews.dto.request.UserRequest;
 import com.techie.mynews.dto.request.UserSourceRequest;
 import com.techie.mynews.dto.response.CheckUserResponse;
@@ -8,12 +7,8 @@ import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -27,7 +22,7 @@ public class UserController {
         return ResponseEntity.ok().body(userService.checkIfUserExists(userRequest.email()));
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<UserResponse> create(@RequestBody UserRequest userRequest) {
         return ResponseEntity.ok().body(userService.create(userRequest.email()));
     }

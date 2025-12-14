@@ -90,6 +90,10 @@ public class UserService {
     }
 
     public UserResponse create(String email) {
+        if (userRepository.findUserByEmail(email) != null) {
+            throw new MyNewsException(HttpStatus.CONFLICT,"User with email " + email + " already exists");
+        }
+
         User user = saveUser(email);
         return userMapper.entityToResponse(user);
     }

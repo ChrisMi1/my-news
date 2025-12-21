@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity(name = "sources")
@@ -25,4 +27,6 @@ public class Source extends BaseEntity{
     private String language;
     @Column(name = "country")
     private String country;
+    @OneToMany(mappedBy = "source",fetch = FetchType.LAZY)
+    private List<UserSource> userSources;
 }

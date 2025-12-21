@@ -1,6 +1,5 @@
 package com.techie.mynews.specification;
 
-import com.techie.mynews.commons.datatable.SearchCriteria;
 import com.techie.mynews.dto.request.SourceCriteriaRequest;
 import com.techie.mynews.model.Source;
 import org.springframework.data.jpa.domain.Specification;

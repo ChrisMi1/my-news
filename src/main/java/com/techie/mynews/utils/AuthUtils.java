@@ -10,7 +10,7 @@ public class AuthUtils {
 
     public static String getActionerName() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null ? auth.getName() : null;
+        return auth != null ? auth.getName() : "system";
     }
 
 }

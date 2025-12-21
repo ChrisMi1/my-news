@@ -2,6 +2,7 @@ package com.techie.mynews.controller;
 
 import com.techie.mynews.dto.request.UserRequest;
 import com.techie.mynews.dto.request.UserSourceRequest;
+import com.techie.mynews.dto.response.ArticleResponse;
 import com.techie.mynews.dto.response.CheckUserResponse;
 import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;

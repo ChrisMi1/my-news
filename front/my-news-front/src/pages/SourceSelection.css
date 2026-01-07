@@ -1,0 +1,164 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a;
+    color: #e5e7eb;
+    overflow: hidden; /* αφαιρούμε scrollbars */
+}
+
+.source-selection-wrapper {
+    height: 100vh; /* full screen */
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #1a73e8 100%);
+}
+
+.centered-text {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #e5e7eb;
+}
+
+.search-wrapper {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 600px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #3b82f6;
+    font-size: 1rem;
+}
+
+.sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-auto-rows: 220px;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    flex-grow: 1; /* καταλαμβάνει όλο τον διαθέσιμο χώρο πάνω από το pagination */
+    overflow: hidden; /* δεν εμφανίζεται scrollbar */
+}
+
+.source-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.source-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+}
+
+.source-card label {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    height: 100%;
+}
+
+.source-card input[type="checkbox"] {
+    margin-bottom: 0.5rem;
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+}
+
+.source-info strong {
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.source-info em {
+    font-size: 0.85rem;
+    color: #60a5fa;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.source-info p {
+    font-size: 0.9rem;
+    color: #d1d5db;
+    max-height: 100px; /* ή ό,τι ύψος θέλουμε */
+    overflow-y: auto;  /* εμφανίζει scrollbar μόνο μέσα στην περιγραφή */
+    margin: 0;
+    scrollbar-width: thin;       
+    scrollbar-color: #999494 transparent;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.pagination-wrapper {
+    position: relative; /* σημαντικό για το absolute του submit */
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 1rem;
+}
+
+.submit-button {
+    position: absolute;
+    right: 0; /* δεξιά */
+    top: 50%; /* για να κεντραριστεί κατακόρυφα */
+    transform: translateY(-50%); /* για ακριβές κεντράρισμα */
+    background: #1e4788;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.submit-button:hover {
+    background: #6c839d;
+}
+
+@media (max-width: 768px) {
+    .sources-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: 200px;
+    }
+}

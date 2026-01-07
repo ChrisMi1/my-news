@@ -1,42 +1,60 @@
 import { useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
-import Login from "./pages/Login.jsx";
+import Login from "./pages/Login";
 import { useToken } from "./useToken";
+import CreateUser from "./pages/CreateUser";
 
 function App() {
     const { accounts } = useMsal();
     const { token, loading: tokenLoading, error: tokenError } = useToken();
-    const [userState, setUserState] = useState({ status: "loading" });
 
-    
+    const [userState, setUserState] = useState({
+        status: "unauthenticated", // unauthenticated | loading | new | existing | error
+        user: null
+    });
+
+    // 1️⃣ Δεν έχει login → Landing
     useEffect(() => {
-        
-        if (!accounts || accounts.length === 0) return;
-        if (!token || tokenLoading) return;
+        if (!accounts || accounts.length === 0) {
+            setUserState({ status: "unauthenticated", user: null });
+        }
+    }, [accounts]);
 
-        const account = accounts[0];
+    // 2️⃣ Έχει login + token → check user
+    useEffect(() => {
+        if (!accounts?.length || !token || tokenLoading) return;
 
         const checkUser = async () => {
             try {
-                const res = await fetch("http://localhost:8080/mynews/api/users/check", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ email: account.username })
-                });
+                setUserState(prev => ({ ...prev, status: "loading" }));
+
+                const res = await fetch(
+                    "http://localhost:8080/mynews/api/users/check",
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }
+                );
 
                 const data = await res.json();
 
                 if (data.exists) {
-                    setUserState({ status: "existingUser", user: data.user });
+                    setUserState({
+                        status: "existing",
+                        user: data.user
+                    });
                 } else {
-                    setUserState({ status: "newUser", user: { email: account.username } });
+                    setUserState({
+                        status: "new",
+                        user: { email: accounts[0].username }
+                    });
                 }
-            } catch (err) {
-                console.error("Error checking user:", err);
-                setUserState({ status: "error" });
+            } catch (e) {
+                console.error(e);
+                setUserState({ status: "error", user: null });
             }
         };
 
@@ -44,13 +62,28 @@ function App() {
     }, [accounts, token, tokenLoading]);
 
     // --- RENDER ---
-    if (!accounts || accounts.length === 0) return <Login />; // User not logged in
-    if (tokenLoading || userState.status === "loading") return <div>Loading...</div>;
-    if (tokenError || userState.status === "error") return <div>Error occurred</div>;
-    if (userState.status === "newUser") return <div>New user...</div>;
-    if (userState.status === "existingUser") return <div>Existing user...</div>;
 
-    return <Login />; // fallback
+    if (userState.status === "unauthenticated") {
+        return <Login />;
+    }
+
+    if (tokenLoading || userState.status === "loading") {
+        return <div>Loading...</div>;
+    }
+
+    if (tokenError || userState.status === "error") {
+        return <div>Something went wrong</div>;
+    }
+
+    if (userState.status === "new") {
+        return <CreateUser user={userState.user} token={token} />;
+    }
+
+    if (userState.status === "existing") {
+        return <div>📰 News page (coming soon)</div>;
+    }
+
+    return null;
 }
 
 export default App;

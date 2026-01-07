@@ -10,10 +10,9 @@ const msalInstance = new PublicClientApplication(msalConfig);
 // Initialize before rendering
 msalInstance.initialize().then(() => {
     createRoot(document.getElementById("root")).render(
-        <StrictMode>
+        
             <MsalProvider instance={msalInstance}>
                 <App />
             </MsalProvider>
-        </StrictMode>
     );
 });

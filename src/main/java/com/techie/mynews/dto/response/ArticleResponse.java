@@ -17,6 +17,6 @@ public class ArticleResponse {
     private String description;
     private String url;
     private String urlToImage;
-    private LocalDateTime publishedAt;
+    private String publishedAt;
     private String content;
 }

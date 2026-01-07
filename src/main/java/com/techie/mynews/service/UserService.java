@@ -13,10 +13,10 @@ import com.techie.mynews.model.UserSource;
 import com.techie.mynews.repository.SourceRepository;
 import com.techie.mynews.repository.UserRepository;
 import com.techie.mynews.repository.UserSourceRepository;
+import com.techie.mynews.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,10 +31,12 @@ public class UserService {
     private final UserSourceMapper userSourceMapper;
     private final UserMapper userMapper;
     public List<UserSourceResponse> saveSources(UserSourceRequest userSourceRequest) {
-        User user = userRepository.findUserByEmail(userSourceRequest.getEmail());
+        String email = getEmail();
+
+        User user = userRepository.findUserByEmail(email);
 
         if (user == null) {
-            throw new MyNewsException(HttpStatus.BAD_REQUEST,"User with email " + userSourceRequest.getEmail() + " not found.");
+            throw new MyNewsException(HttpStatus.BAD_REQUEST,"User with email " + email + " not found.");
         }
 
         List<Source> sources = mapSourceIdsToSources(userSourceRequest.getSourcesIds());
@@ -71,7 +73,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public CheckUserResponse checkIfUserExists(String email) {
+    public CheckUserResponse checkIfUserExists() {
+        String email = getEmail();
+
         log.info("Checking if user exists with email: " + email);
         User user = userRepository.findUserByEmail(email);
         CheckUserResponse checkUserResponse = new CheckUserResponse();
@@ -89,12 +93,20 @@ public class UserService {
         return checkUserResponse;
     }
 
-    public UserResponse create(String email) {
+    public UserResponse create() {
+        String email = getEmail();
+
         if (userRepository.findUserByEmail(email) != null) {
             throw new MyNewsException(HttpStatus.CONFLICT,"User with email " + email + " already exists");
         }
 
         User user = saveUser(email);
         return userMapper.entityToResponse(user);
+    }
+
+    private String getEmail() {
+        String email = AuthUtils.getActionerEmail();
+        if (email == null) throw new MyNewsException(HttpStatus.NOT_FOUND,"No email found");
+        return email;
     }
 }

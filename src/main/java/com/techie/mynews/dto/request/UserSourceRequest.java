@@ -7,6 +7,5 @@ import java.util.List;
 @Getter
 @Setter
 public class UserSourceRequest {
-    private String email;
     private List<Integer> sourcesIds;
 }

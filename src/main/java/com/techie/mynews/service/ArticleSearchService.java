@@ -7,17 +7,20 @@ import com.techie.mynews.dto.request.ArticleCriteriaRequest;
 import com.techie.mynews.dto.request.SourceCriteriaRequest;
 import com.techie.mynews.dto.response.ArticleSearchResponse;
 import com.techie.mynews.dto.response.SourceSearchResponse;
+import com.techie.mynews.exception.MyNewsException;
 import com.techie.mynews.model.Article;
 import com.techie.mynews.model.Source;
 import com.techie.mynews.repository.ArticleRepository;
 import com.techie.mynews.specification.ArticleSpecification;
 import com.techie.mynews.specification.SourceSpecification;
+import com.techie.mynews.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -26,8 +29,10 @@ public class ArticleSearchService  extends DatatableResponseFactory<ArticleCrite
     private final ArticleRepository articleRepository;
 
     public SearchResponse<ArticleCriteriaRequest> search(SearchRequest<ArticleCriteriaRequest> searchRequest) {
+        String email = AuthUtils.getActionerEmail();
+        if (email == null) throw new MyNewsException(HttpStatus.NOT_FOUND,"No sources found for this email");
         Pageable pageable = PageRequest.of(searchRequest.getPageNumber(),searchRequest.getPageTotalContentSize(), Sort.by(Sort.Order.desc("publishedAt")));
-        Specification<Article> spec = Specification.allOf(ArticleSpecification.articleSpecifications(searchRequest.getSearchCriteria()));
+        Specification<Article> spec = Specification.allOf(ArticleSpecification.articleSpecifications(searchRequest.getSearchCriteria(),email));
         Page<ArticleSearchResponse> responsePage = articleRepository.findAll(spec,pageable).map(this::mapToArticleSearchResponse);
         return convertToSearchResponse(responsePage,searchRequest);
     }

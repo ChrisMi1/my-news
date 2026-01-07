@@ -5,6 +5,7 @@ import com.techie.mynews.commons.datatable.SearchResponse;
 import com.techie.mynews.dto.request.ArticleCriteriaRequest;
 import com.techie.mynews.dto.request.SourceCriteriaRequest;
 import com.techie.mynews.service.ArticleSearchService;
+import com.techie.mynews.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

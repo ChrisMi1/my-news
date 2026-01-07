@@ -1,6 +1,5 @@
 package com.techie.mynews.mapper;
 
-import com.techie.mynews.dto.request.UserRequest;
 import com.techie.mynews.dto.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

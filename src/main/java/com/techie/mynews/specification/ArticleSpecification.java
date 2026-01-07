@@ -17,18 +17,17 @@ public class ArticleSpecification {
 
     }
 
-    public static Specification<Article> articleSpecifications(ArticleCriteriaRequest searchCriteria) {
+    public static Specification<Article> articleSpecifications(ArticleCriteriaRequest searchCriteria,String email) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             Join<Article, Source> sourceJoin = root.join("source");
             if (searchCriteria.getSourceName() != null) {
                 predicates.add(criteriaBuilder.equal(sourceJoin.get("name"),searchCriteria.getSourceName()));
             }
-            if (searchCriteria.getUserEmail() != null) {
-                Join<Source, UserSource> userSourceJoin = sourceJoin.join("userSources");
-                Join<UserSource, User> userJoin = userSourceJoin.join("user");
-                predicates.add(criteriaBuilder.equal(userJoin.get("email"),searchCriteria.getUserEmail()));
-            }
+            Join<Source, UserSource> userSourceJoin = sourceJoin.join("userSources");
+            Join<UserSource, User> userJoin = userSourceJoin.join("user");
+            predicates.add(criteriaBuilder.equal(userJoin.get("email"),email));
+
             query.distinct(true);
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

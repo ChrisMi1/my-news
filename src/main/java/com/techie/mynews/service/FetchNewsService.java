@@ -9,8 +9,7 @@ import com.techie.mynews.repository.SourceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -57,7 +56,7 @@ public class FetchNewsService {
         article.setSource(source);
         article.setAuthor(articleResponse.getAuthor());
         article.setDescription(articleResponse.getDescription());
-        article.setPublishedAt(articleResponse.getPublishedAt());
+        article.setPublishedAt(OffsetDateTime.parse(articleResponse.getPublishedAt()).toLocalDateTime());
         article.setContent(articleResponse.getContent());
         article.setUrl(articleResponse.getUrl());
         article.setUrlToImage(articleResponse.getUrlToImage());

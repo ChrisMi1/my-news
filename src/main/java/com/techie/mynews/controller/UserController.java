@@ -1,8 +1,6 @@
 package com.techie.mynews.controller;
 
-import com.techie.mynews.dto.request.UserRequest;
 import com.techie.mynews.dto.request.UserSourceRequest;
-import com.techie.mynews.dto.response.ArticleResponse;
 import com.techie.mynews.dto.response.CheckUserResponse;
 import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;
@@ -18,14 +16,14 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/check")
-    public ResponseEntity<CheckUserResponse> check(@RequestBody UserRequest userRequest) {
-        return ResponseEntity.ok().body(userService.checkIfUserExists(userRequest.email()));
+    @GetMapping("/check")
+    public ResponseEntity<CheckUserResponse> check() {
+        return ResponseEntity.ok().body(userService.checkIfUserExists());
     }
 
     @PostMapping("")
-    public ResponseEntity<UserResponse> create(@RequestBody UserRequest userRequest) {
-        return ResponseEntity.ok().body(userService.create(userRequest.email()));
+    public ResponseEntity<UserResponse> create() {
+        return ResponseEntity.ok().body(userService.create());
     }
 
     @PostMapping("/sources")

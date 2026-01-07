@@ -10,5 +10,4 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ArticleCriteriaRequest implements SearchCriteria {
     private String sourceName;
-    private String userEmail;
 }

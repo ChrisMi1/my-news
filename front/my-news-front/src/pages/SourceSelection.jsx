@@ -1,14 +1,28 @@
 import { useEffect, useState, useRef } from "react";
 import "./SourceSelection.css";
 
-export default function SourceSelection({ user, token }) {
+export default function SourceSelection({ token, isFirstTime = false }) {
     const [sources, setSources] = useState([]);
     const [pageNumber, setPageNumber] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [selectedSources, setSelectedSources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const inputRef = useRef(null);
+    const [selectedObjects, setSelectedObjects] = useState([]);
+    
+    const fetchUserSources = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedSources(data.map(s => s.id));
+            }
+        } catch (err) {
+            console.error("Error fetching user sources:", err);
+        }
+    };
 
     const fetchSources = async (page, query = "") => {
         setLoading(true);
@@ -25,7 +39,6 @@ export default function SourceSelection({ user, token }) {
                     pageTotalContentSize: 8
                 })
             });
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             setSources(data.content);
             setTotalPages(data.totalPages);
@@ -35,6 +48,10 @@ export default function SourceSelection({ user, token }) {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchUserSources(); 
+    }, [token]);
 
     useEffect(() => {
         fetchSources(pageNumber, searchQuery);
@@ -48,20 +65,27 @@ export default function SourceSelection({ user, token }) {
         return () => clearTimeout(handler);
     }, [searchQuery, token]);
 
+    useEffect(() => {
+        
+        const newMatches = sources.filter(src => selectedSources.includes(src.id));
+        
+        setSelectedObjects(prev => {
+            
+            const combined = [...prev, ...newMatches];
+            
+            const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+            return unique.filter(u => selectedSources.includes(u.id));
+        });
+    }, [selectedSources, sources]);
+
+
     const toggleSource = (id) => {
         setSelectedSources(prev =>
-            prev.includes(id)
-                ? prev.filter(sid => sid !== id)
-                : [...prev, id]
+            prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
         );
     };
 
-    const handleNext = () => setPageNumber(prev => prev + 1);
-    const handlePrev = () => setPageNumber(prev => Math.max(prev - 1, 0));
-
     const handleSubmit = async () => {
-        if (selectedSources.length === 0) return;
-
         try {
             const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
                 method: "POST",
@@ -69,75 +93,89 @@ export default function SourceSelection({ user, token }) {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    email: user.email,
-                    sourcesIds: selectedSources
-                })
+                body: JSON.stringify({ sourcesIds: selectedSources })
             });
 
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-            // Redirect στη σελίδα των ειδήσεων
-            window.location.href = "/news";
+            if (!res.ok) throw new Error("Failed to save");
+            
+            
+            window.location.href = "/NewsPage";
         } catch (err) {
-            console.error("Failed to save sources:", err);
-            alert("Something went wrong while saving your sources.");
+            alert("Σφάλμα κατά την αποθήκευση.");
         }
     };
 
+    
+
     return (
-        <div className="source-selection-wrapper">
-            <h3 className="centered-text">Select the news sources you want:</h3>
+        <div className="source-selection-container">
+            <aside className={`selected-summary-panel ${selectedSources.length > 0 ? 'visible' : ''}`}>
+                <div className="summary-header">
+                    <h4>Selected Sources({selectedSources.length})</h4>
+                </div>
+                <div className="summary-list">
+                    {selectedObjects.map(obj => (
+                        <div key={obj.id} className="summary-tag">
+                            <span>{obj.name}</span>
+                            <button onClick={() => toggleSource(obj.id)}>×</button>
+                        </div>
+                    ))}
+                </div>
+            </aside>
+            <header className="selection-header">
+                <h2>{isFirstTime ? "Welcome! Select your news sources" : "Edit your news sources"}</h2>
+                <div className="search-box">
+                    <input
+                        type="text"
+                        placeholder="Search for a source..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </header>
 
-            <div className="search-wrapper">
-                <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Search a source"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                />
-            </div>
-
-            {loading ? (
-                <div>Loading sources…</div>
-            ) : (
-                <>
+            <main className="selection-content">
+                {loading ? (
+                    <div className="loader">Loading sources...</div>
+                ) : (
                     <div className="sources-grid">
                         {sources.map(src => (
-                            <div key={src.id} className="source-card">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedSources.includes(src.id)}
-                                        onChange={() => toggleSource(src.id)}
+                            <div 
+                                key={src.id} 
+                                className={`source-card ${selectedSources.includes(src.id) ? 'selected' : ''}`}
+                                onClick={() => toggleSource(src.id)}
+                            >
+                                <div className="card-header">
+                                    <input 
+                                        type="checkbox" 
+                                        readOnly 
+                                        checked={selectedSources.includes(src.id)} 
                                     />
-                                    <span className="source-info">
-                                        <strong>{src.name}</strong>
-                                        <em>{src.category}</em>
-                                        <p>{src.description}</p>
-                                    </span>
-                                </label>
+                                    <strong>{src.name}</strong>
+                                </div>
+                                <span className="category-tag">{src.category}</span>
+                                <p className="description-text">{src.description}</p>
                             </div>
                         ))}
                     </div>
+                )}
+            </main>
 
-                    <div className="pagination-wrapper">
-                        <div className="pagination">
-                            <button onClick={handlePrev} disabled={pageNumber === 0}>Previous</button>
-                            <span>Page {pageNumber + 1} of {totalPages}</span>
-                            <button onClick={handleNext} disabled={pageNumber + 1 >= totalPages}>Next</button>
-                        </div>
-
-                        {selectedSources.length > 0 && (
-                            <button className="submit-button" onClick={handleSubmit}>
-                                Submit
-                            </button>
-                        )}
-                    </div>
-                </>
-            )}
+            <footer className="selection-footer">
+                <div className="pagination">
+                    <button onClick={() => setPageNumber(p => Math.max(0, p - 1))} disabled={pageNumber === 0}>Prev</button>
+                    <span>{pageNumber + 1} / {totalPages}</span>
+                    <button onClick={() => setPageNumber(p => p + 1)} disabled={pageNumber + 1 >= totalPages}>Next</button>
+                </div>
+                
+                <button 
+                    className="submit-btn" 
+                    disabled={selectedSources.length === 0}
+                    onClick={handleSubmit}
+                >
+                    Save Changes ({selectedSources.length})
+                </button>
+            </footer>
         </div>
     );
 }

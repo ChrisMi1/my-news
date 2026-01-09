@@ -1,28 +1,39 @@
 import { useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
 import Login from "./pages/Login";
-import { useToken } from "./useToken";
 import CreateUser from "./pages/CreateUser";
+import NewsPage from "./pages/NewsPage";
+import { acquireToken } from "./authUtils"; 
 
 function App() {
-    const { accounts } = useMsal();
-    const { token, loading: tokenLoading, error: tokenError } = useToken();
-
+    const { instance, accounts } = useMsal();
+    const [token, setToken] = useState(null);
     const [userState, setUserState] = useState({
-        status: "unauthenticated", // unauthenticated | loading | new | existing | error
+        status: "unauthenticated", 
         user: null
     });
 
-    // 1️⃣ Δεν έχει login → Landing
+    
     useEffect(() => {
-        if (!accounts || accounts.length === 0) {
+        if (accounts && accounts.length > 0) {
+            const initToken = async () => {
+                const accessToken = await acquireToken(instance, accounts[0]);
+                if (accessToken) {
+                    setToken(accessToken);
+                } else {
+                    setUserState({ status: "unauthenticated", user: null });
+                }
+            };
+            initToken();
+        } else {
             setUserState({ status: "unauthenticated", user: null });
         }
-    }, [accounts]);
+    }, [accounts, instance]);
 
-    // 2️⃣ Έχει login + token → check user
+    
     useEffect(() => {
-        if (!accounts?.length || !token || tokenLoading) return;
+        
+        if (!accounts?.length || !token) return;
 
         const checkUser = async () => {
             try {
@@ -39,18 +50,20 @@ function App() {
                     }
                 );
 
-                const data = await res.json();
+                if (res.status === 401) {
+                    
+                    const newToken = await acquireToken(instance, accounts[0]);
+                    if (newToken) {
+                        setToken(newToken);
+                        return; 
+                    }
+                }
 
+                const data = await res.json();
                 if (data.exists) {
-                    setUserState({
-                        status: "existing",
-                        user: data.user
-                    });
+                    setUserState({ status: "existing", user: data.user });
                 } else {
-                    setUserState({
-                        status: "new",
-                        user: { email: accounts[0].username }
-                    });
+                    setUserState({ status: "new", user: { email: accounts[0].username } });
                 }
             } catch (e) {
                 console.error(e);
@@ -59,28 +72,23 @@ function App() {
         };
 
         checkUser();
-    }, [accounts, token, tokenLoading]);
+    }, [accounts, token, instance]);
 
     // --- RENDER ---
-
-    if (userState.status === "unauthenticated") {
-        return <Login />;
-    }
-
-    if (tokenLoading || userState.status === "loading") {
+    if (userState.status === "unauthenticated") return <Login />;
+    
+    if ((accounts?.length > 0 && !token) || userState.status === "loading") {
         return <div>Loading...</div>;
     }
 
-    if (tokenError || userState.status === "error") {
-        return <div>Something went wrong</div>;
-    }
+    if (userState.status === "error") return <div>Something went wrong</div>;
 
     if (userState.status === "new") {
         return <CreateUser user={userState.user} token={token} />;
     }
 
     if (userState.status === "existing") {
-        return <div>📰 News page (coming soon)</div>;
+        return <NewsPage token={token} />;
     }
 
     return null;

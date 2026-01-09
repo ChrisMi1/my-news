@@ -1,164 +1,269 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: #0f172a;
-    color: #e5e7eb;
-    overflow: hidden; /* αφαιρούμε scrollbars */
-}
-
-.source-selection-wrapper {
-    height: 100vh; /* full screen */
+/* Layout Fix */
+.source-selection-container {
+    height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 2rem;
-    box-sizing: border-box;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #1a73e8 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    overflow: hidden; 
 }
 
-.centered-text {
+/* Header Section */
+.selection-header {
+    padding: 30px 20px; /* Αυξημένο padding για περισσότερο αέρα */
     text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    color: #e5e7eb;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
 }
 
-.search-wrapper {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.search-input {
+.search-box input {
     width: 100%;
-    max-width: 600px;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    max-width: 500px;
+    padding: 12px 20px;
+    border-radius: 25px;
     border: 1px solid #3b82f6;
+    background: #1e293b;
+    color: white;
+    outline: none;
     font-size: 1rem;
+}
+
+/* Main Content Area */
+.selection-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 20px; /* Περισσότερο padding γύρω από το grid */
+    display: flex;
+    justify-content: center;
 }
 
 .sources-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    grid-auto-rows: 220px;
-    gap: 1.5rem;
+    /* Αυξάνουμε το ελάχιστο πλάτος (320px) για μεγαλύτερες καρτέλες */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* Ορίζουμε ένα σταθερό ύψος για όλες τις καρτέλες ώστε να είναι ομοιόμορφες */
+    grid-auto-rows: 280px; 
+    gap: 2rem;
     width: 100%;
-    max-width: 1200px;
-    flex-grow: 1; /* καταλαμβάνει όλο τον διαθέσιμο χώρο πάνω από το pagination */
-    overflow: hidden; /* δεν εμφανίζεται scrollbar */
+    max-width: 1400px; /* Αυξάνουμε το max-width για μεγάλες οθόνες */
 }
 
+/* Card Styling */
 .source-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    border-radius: 12px;
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px; /* Πιο στρογγυλεμένες γωνίες */
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    gap: 12px;
+}
+
+.source-card.selected {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 }
 
 .source-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.08);
 }
 
-.source-card label {
+.card-header {
     display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    height: 100%;
+    align-items: center;
+    gap: 12px;
 }
 
-.source-card input[type="checkbox"] {
-    margin-bottom: 0.5rem;
-    width: 18px;
-    height: 18px;
-    accent-color: #3b82f6;
-}
-
-.source-info strong {
-    font-size: 1.1rem;
+.card-header strong {
+    font-size: 1.2rem; /* Μεγαλύτερος τίτλος */
     color: #ffffff;
 }
 
-.source-info em {
-    font-size: 0.85rem;
-    color: #60a5fa;
-    display: block;
-    margin-bottom: 0.5rem;
+.category-tag {
+    font-size: 0.8rem;
+    color: #3b82f6;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
-.source-info p {
-    font-size: 0.9rem;
-    color: #d1d5db;
-    max-height: 100px; /* ή ό,τι ύψος θέλουμε */
-    overflow-y: auto;  /* εμφανίζει scrollbar μόνο μέσα στην περιγραφή */
+/* Διόρθωση για το κείμενο που ξεχειλίζει */
+.description-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
     margin: 0;
-    scrollbar-width: thin;       
-    scrollbar-color: #999494 transparent;
+    
+    /* Χρήση line-clamp για αυτόματη περικοπή μετά από 5 γραμμές */
+    display: -webkit-box;
+    -webkit-line-clamp: 5; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Footer Section */
+.selection-footer {
+    padding: 20px 40px;
+    background: rgba(15, 23, 42, 0.95);
+    display: flex;
+    justify-content: center; /* Κεντράρισμα pagination */
+    align-items: center;
+    border-top: 1px solid rgba(59, 130, 246, 0.3);
+    position: relative;
 }
 
 .pagination {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 20px;
 }
 
 .pagination button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
     background: #3b82f6;
     color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
     cursor: pointer;
-    transition: 0.2s;
+    font-weight: 600;
+    transition: background 0.2s;
 }
 
 .pagination button:hover:not(:disabled) {
     background: #2563eb;
 }
 
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
-
-.pagination-wrapper {
-    position: relative; /* σημαντικό για το absolute του submit */
-    width: 100%;
-    max-width: 1200px;
-    margin-top: 1rem;
-}
-
-.submit-button {
-    position: absolute;
-    right: 0; /* δεξιά */
-    top: 50%; /* για να κεντραριστεί κατακόρυφα */
-    transform: translateY(-50%); /* για ακριβές κεντράρισμα */
-    background: #1e4788;
-    color: white;
+.submit-btn {
+    position: absolute; /* Τοποθέτηση δεξιά χωρίς να χαλάει το κεντράρισμα */
+    right: 40px;
+    padding: 10px 24px;
+    border-radius: 8px;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
+    background: #10b981;
+    color: white;
     cursor: pointer;
-    transition: 0.2s;
+    font-weight: 700;
+    transition: all 0.2s;
 }
 
-.submit-button:hover {
-    background: #6c839d;
+.submit-btn:hover:not(:disabled) {
+    background: #059669;
+    transform: scale(1.05);
 }
 
+.submit-btn:disabled {
+    background: #334155;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+    .submit-btn {
+        position: static;
+        margin-top: 10px;
+    }
+    .selection-footer {
+        flex-direction: column;
+        padding: 20px;
+    }
     .sources-grid {
         grid-template-columns: 1fr;
-        grid-auto-rows: 200px;
+        grid-auto-rows: auto; /* Επιτρέπουμε δυναμικό ύψος στα κινητά */
+    }
+}
+
+/* --- Floating Summary Panel --- */
+.selected-summary-panel {
+    position: fixed;
+    right: -320px; /* Κρυμμένο αρχικά */
+    top: 100px;
+    bottom: 100px;
+    width: 280px;
+    background: rgba(30, 41, 59, 0.95); /* Slate 800 με διαφάνεια */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 20px 0 0 20px;
+    z-index: 100;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Εμφάνιση όταν υπάρχουν επιλογές */
+.selected-summary-panel.visible {
+    right: 0;
+}
+
+.summary-header h4 {
+    margin: 0 0 15px 0;
+    color: #3b82f6;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.summary-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: flex-start;
+}
+
+/* Τα "ταμπελάκια" των επιλεγμένων */
+.summary-tag {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid #3b82f6;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    animation: tagPop 0.3s ease-out;
+}
+
+.summary-tag button {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.summary-tag button:hover {
+    color: #ef4444; /* Red 500 */
+}
+
+@keyframes tagPop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Προσαρμογή Grid για να μην πέφτει πάνω στο panel */
+@media (min-width: 1400px) {
+    .source-selection-container.visible-panel .selection-content {
+        padding-right: 320px;
+    }
+}
+
+/* Mobile: Το κάνουμε οριζόντιο στο κάτω μέρος αν χρειαστεί */
+@media (max-width: 900px) {
+    .selected-summary-panel {
+        display: none; /* Κρύβεται στα κινητά για οικονομία χώρου */
     }
 }

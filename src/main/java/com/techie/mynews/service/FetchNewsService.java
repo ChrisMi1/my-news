@@ -8,6 +8,8 @@ import com.techie.mynews.repository.ArticleRepository;
 import com.techie.mynews.repository.SourceRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -57,11 +59,15 @@ public class FetchNewsService {
         article.setAuthor(articleResponse.getAuthor());
         article.setDescription(articleResponse.getDescription());
         article.setPublishedAt(OffsetDateTime.parse(articleResponse.getPublishedAt()).toLocalDateTime());
-        article.setContent(articleResponse.getContent());
+        article.setContent(cleanContent(articleResponse.getContent()));
         article.setUrl(articleResponse.getUrl());
         article.setUrlToImage(articleResponse.getUrlToImage());
         article.setTitle(articleResponse.getTitle());
         return article;
+    }
+
+    public String cleanContent(String content) {
+        return content.replaceAll("\\s*\\[\\+?\\d+\\s*chars?]\\s*", "").trim();
     }
 
 }

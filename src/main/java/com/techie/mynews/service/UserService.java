@@ -2,9 +2,11 @@ package com.techie.mynews.service;
 
 import com.techie.mynews.dto.request.UserSourceRequest;
 import com.techie.mynews.dto.response.CheckUserResponse;
+import com.techie.mynews.dto.response.SourceResponse;
 import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.exception.MyNewsException;
+import com.techie.mynews.mapper.SourceMapper;
 import com.techie.mynews.mapper.UserMapper;
 import com.techie.mynews.mapper.UserSourceMapper;
 import com.techie.mynews.model.Source;
@@ -30,6 +32,7 @@ public class UserService {
     private final UserSourceRepository userSourceRepository;
     private final UserSourceMapper userSourceMapper;
     private final UserMapper userMapper;
+    private final SourceMapper sourceMapper;
     public List<UserSourceResponse> saveSources(UserSourceRequest userSourceRequest) {
         String email = getEmail();
 
@@ -108,5 +111,10 @@ public class UserService {
         String email = AuthUtils.getActionerEmail();
         if (email == null) throw new MyNewsException(HttpStatus.NOT_FOUND,"No email found");
         return email;
+    }
+
+    public List<SourceResponse> getSelectedSourcesByUser() {
+        User user = userRepository.findUserByEmail(getEmail());
+        return sourceMapper.toSourceResponseList(user.getSources());
     }
 }

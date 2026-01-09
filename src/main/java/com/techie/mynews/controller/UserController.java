@@ -2,6 +2,7 @@ package com.techie.mynews.controller;
 
 import com.techie.mynews.dto.request.UserSourceRequest;
 import com.techie.mynews.dto.response.CheckUserResponse;
+import com.techie.mynews.dto.response.SourceResponse;
 import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.service.UserService;
@@ -29,5 +30,10 @@ public class UserController {
     @PostMapping("/sources")
     public ResponseEntity<List<UserSourceResponse>> saveSources(@RequestBody UserSourceRequest userSourceRequest) {
         return ResponseEntity.ok(userService.saveSources(userSourceRequest));
+    }
+
+    @GetMapping("/sources")
+    public ResponseEntity<List<SourceResponse>> fetchSources() {
+        return ResponseEntity.ok(userService.getSelectedSourcesByUser());
     }
 }

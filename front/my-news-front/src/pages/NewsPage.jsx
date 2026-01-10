@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import "./NewsPage.css";
 import { acquireToken } from "../authUtils";
 import { useMsal } from "@azure/msal-react";
+import { useAuth } from "../AuthFlow";
+import { useNavigate } from "react-router-dom";
 
-function NewsPage({ token, onLogout, onEditSources }) {
+function NewsPage({ onLogout, onEditSources }) {
   const [articles, setArticles] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
   const [userSources, setUserSources] = useState([]);
@@ -13,8 +15,10 @@ function NewsPage({ token, onLogout, onEditSources }) {
   const [error, setError] = useState(null);
   const carouselRef = useRef(null);
   const { instance, accounts } = useMsal();
+  const { token, logout, refreshToken } = useAuth();
   const [currentToken, setCurrentToken] = useState(token);
-
+  const navigate = useNavigate();
+  
   const fetchUserSources = async () => {
     try {
       const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
@@ -33,8 +37,12 @@ function NewsPage({ token, onLogout, onEditSources }) {
     try {
       setLoading(true);
       setError(null);
-      const searchCriteria = source !== "all" ? { sourceName: source } : {};
 
+      const bodyData = JSON.stringify({
+          searchCriteria: source !== "all" ? { sourceName: source } : {},
+          pageNumber: page,
+          pageTotalContentSize: 6,
+        });
       let res = await fetch(
         "http://localhost:8080/mynews/api/articles/search",
         {
@@ -43,30 +51,25 @@ function NewsPage({ token, onLogout, onEditSources }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${currentToken}`,
           },
-          body: JSON.stringify({
-            searchCriteria: searchCriteria,
-            pageNumber: page,
-            pageTotalContentSize: 6
-          }),
+          body: bodyData,
         }
       );
 
       if (res.status === 401) {
-                console.warn("401 detected. Refreshing token...");
-                
-                // Κλήση της συνάρτησης (όχι Hook πια!)
-                const newToken = await acquireToken(instance, accounts[0]);
+      const newToken = await refreshToken();
 
-                if (newToken) {
-                    setCurrentToken(newToken); // Ενημέρωση του state για επόμενα requests
-                    // Επανάληψη του αιτήματος με το νέο token
-                    res = await fetch("http://localhost:8080/mynews/api/articles/search", getOptions(newToken));
-                } else {
-                    
-                    instance.loginRedirect();
-                    return;
-                }
-            }
+      if (newToken) {
+        
+        res = await fetch("http://localhost:8080/mynews/api/articles/search", {
+          method: "POST",
+          headers: { 
+              "Content-Type": "application/json", 
+              "Authorization": `Bearer ${newToken}` 
+          },
+          body: bodyData
+        });
+      }
+    }
 
       if (!res.ok) throw new Error();
 
@@ -97,7 +100,7 @@ function NewsPage({ token, onLogout, onEditSources }) {
     const handlePrev = () => setPageNumber(prev => Math.max(prev - 1, 0));
     const handleSourceChange = (sourceName) => {
       setSelectedSource(sourceName);
-      setPageNumber(0); // Επαναφορά στην πρώτη σελίδα
+      setPageNumber(0); 
     };
 
     const scrollCarousel = (direction) => {
@@ -154,8 +157,8 @@ function NewsPage({ token, onLogout, onEditSources }) {
         </div>
 
         <div className="header-right">
-          <button onClick={onEditSources} className="nav-btn">Edit Sources</button>
-          <button onClick={onLogout} className="nav-btn logout">Log Out</button>
+         <button onClick={() => navigate("/edit-sources")} className="nav-btn">Edit Sources</button>
+          <button onClick={logout} className="nav-btn logout">Log Out</button>
         </div>
       </header>
 

@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import "./SourceSelection.css";
+import { useAuth } from "../AuthFlow";
+import { useNavigate } from "react-router-dom";
 
-export default function SourceSelection({ token, isFirstTime = false }) {
+export default function SourceSelection({ isFirstTime = false }) {
     const [sources, setSources] = useState([]);
     const [pageNumber, setPageNumber] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -9,6 +11,9 @@ export default function SourceSelection({ token, isFirstTime = false }) {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedObjects, setSelectedObjects] = useState([]);
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const { token } = useAuth();
+    const navigate = useNavigate();
     
     const fetchUserSources = async () => {
         try {
@@ -18,6 +23,7 @@ export default function SourceSelection({ token, isFirstTime = false }) {
             if (res.ok) {
                 const data = await res.json();
                 setSelectedSources(data.map(s => s.id));
+                setSelectedObjects(data);
             }
         } catch (err) {
             console.error("Error fetching user sources:", err);
@@ -98,8 +104,7 @@ export default function SourceSelection({ token, isFirstTime = false }) {
 
             if (!res.ok) throw new Error("Failed to save");
             
-            
-            window.location.href = "/NewsPage";
+            navigate("/");
         } catch (err) {
             alert("Σφάλμα κατά την αποθήκευση.");
         }
@@ -109,21 +114,25 @@ export default function SourceSelection({ token, isFirstTime = false }) {
 
     return (
         <div className="source-selection-container">
-            <aside className={`selected-summary-panel ${selectedSources.length > 0 ? 'visible' : ''}`}>
-                <div className="summary-header">
-                    <h4>Selected Sources({selectedSources.length})</h4>
-                </div>
-                <div className="summary-list">
-                    {selectedObjects.map(obj => (
-                        <div key={obj.id} className="summary-tag">
-                            <span>{obj.name}</span>
-                            <button onClick={() => toggleSource(obj.id)}>×</button>
-                        </div>
-                    ))}
-                </div>
-            </aside>
+           <aside className={`selected-summary-panel ${isPanelOpen ? 'visible' : ''}`}>
+            <div className="summary-header">
+                <h4>Selected Sources ({selectedSources.length})</h4>
+                {/* Κουμπί για κλείσιμο μέσα στο πάνελ */}
+                <button className="close-panel-btn" onClick={() => setIsPanelOpen(false)}>×</button>
+            </div>
+            <div className="summary-list">
+                {selectedObjects.map(obj => (
+                    <div key={obj.id} className="summary-tag">
+                        <span>{obj.name}</span>
+                        <button onClick={() => toggleSource(obj.id)}>×</button>
+                    </div>
+                ))}
+            </div>
+        </aside>
+        {isPanelOpen && <div className="panel-overlay" onClick={() => setIsPanelOpen(false)}></div>}
             <header className="selection-header">
                 <h2>{isFirstTime ? "Welcome! Select your news sources" : "Edit your news sources"}</h2>
+                <div className="search-row">
                 <div className="search-box">
                     <input
                         type="text"
@@ -132,6 +141,13 @@ export default function SourceSelection({ token, isFirstTime = false }) {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+                <button 
+                    className="show-selected-btn"
+                    onClick={() => setIsPanelOpen(true)}
+                >
+                    Show selected sources ({selectedSources.length})
+                </button>
+            </div>
             </header>
 
             <main className="selection-content">
@@ -173,7 +189,7 @@ export default function SourceSelection({ token, isFirstTime = false }) {
                     disabled={selectedSources.length === 0}
                     onClick={handleSubmit}
                 >
-                    Save Changes ({selectedSources.length})
+                    Save Changes
                 </button>
             </footer>
         </div>

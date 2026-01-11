@@ -3,12 +3,13 @@ package com.techie.mynews.model;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 @Entity
 @Table(name = "user_sources")
 public class UserSource extends BaseEntity{

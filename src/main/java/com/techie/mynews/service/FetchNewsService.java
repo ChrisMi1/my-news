@@ -67,7 +67,7 @@ public class FetchNewsService {
     }
 
     public String cleanContent(String content) {
-        return content.replaceAll("\\s*\\[\\+?\\d+\\s*chars?]\\s*", "").trim();
+        return !StringUtils.isBlank(content) ? content.replaceAll("\\s*\\[\\+?\\d+\\s*chars?]\\s*", "").trim() : null;
     }
 
 }

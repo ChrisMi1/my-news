@@ -10,11 +10,16 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",uses = {UserMapper.class,SourceMapper.class})
 public interface UserSourceMapper {
-    UserSource INSTANCE = Mappers.getMapper(UserSource.class);
+    UserSourceMapper INSTANCE = Mappers.getMapper(UserSourceMapper.class);
 
-    @Mapping(target = "user", source = "user")
-    @Mapping(target = "source", source = "source")
-    UserSourceResponse entityToResponse(UserSource userSource);
+    @Mapping(target = "user", source = "userSource.user")
+    @Mapping(target = "source", source = "userSource.source")
+    @Mapping(target = "action", expression = "java(action)")
+    UserSourceResponse entityToResponse(UserSource userSource,String action);
 
-    List<UserSourceResponse> toUserSourceResponseList(List<UserSource> userSources);
+    default List<UserSourceResponse> toUserSourceResponseList(List<UserSource> userSources, String action) {
+        return userSources.stream()
+                .map(s -> entityToResponse(s, action))
+                .toList();
+    }
 }

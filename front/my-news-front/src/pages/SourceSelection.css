@@ -8,7 +8,48 @@
     color: white;
     overflow: hidden; 
 }
+.header-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 5px;
+}
 
+/* Στυλ για το λογότυπο (ίδιο με το NewsPage) */
+.header-left .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    /* Χρήση Slate/Grey-Blue για να μην μπερδεύεται με το μπλε των πηγών */
+    background: rgba(248, 250, 252, 0.05); 
+    border: 1px solid rgba(248, 250, 252, 0.2); 
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #f8fafc; /* Καθαρό λευκό/γκρι */
+    white-space: nowrap;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-logo.clickable:active {
+    transform: translateY(0);
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.app-logo.clickable:hover {
+    opacity: 1;
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+/* Placeholder για να κεντραριστεί ο τίτλος <h2> */
+.header-placeholder {
+    width: 150px; /* Προσαρμόστε το ώστε να είναι ίσο με το πλάτος του logo */
+}
 /* Header Section */
 .selection-header {
     /* padding: 30px 20px; */
@@ -291,6 +332,7 @@
 .summary-tag button:hover {
     color: #ef4444;
 }
+
 @media (max-height: 800px) {
     .selection-header h2 { font-size: 1.5rem; margin: 0; }
     .selection-header { padding: 10px 20px; gap: 10px; }
@@ -299,28 +341,68 @@
 }
 /* Responsiveness */
 @media (max-width: 850px) {
-    .search-row {
-        flex-direction: column; /* Σπάνε σε 2 σειρές πριν προλάβουν να ακουμπήσουν */
-        align-items: center;
-        gap: 15px;
+    /* 1. Επιτρέπουμε στα στοιχεία να αναπνεύσουν */
+    .header-top-row {
+        flex-direction: row; 
+        justify-content: flex-start;
+        align-items: flex-start; /* Στοίχιση στην κορυφή αν ο τίτλος έχει πολλές γραμμές */
+        gap: 12px;
+        margin-bottom: 15px;
+        width: 100%;
+        flex-wrap: nowrap; /* Διατήρηση στην ίδια σειρά με το κουμπί */
     }
+
+    .header-placeholder {
+        display: none;
+    }
+
+    /* 2. Διόρθωση τίτλου για να ΜΗΝ κόβεται */
+    .selection-header h2 {
+        font-size: 1.1rem;      /* Ελαφρώς μικρότερο μέγεθος */
+        text-align: left;
+        margin: 0;
+        flex: 1;
+        white-space: normal;    /* ΕΠΙΤΡΕΠΟΥΜΕ την αλλαγή γραμμής */
+        overflow: visible;      /* Εμφάνιση όλου του κειμένου */
+        line-height: 1.3;       /* Καλή απόσταση μεταξύ των γραμμών */
+        word-break: break-word; /* Σπάσιμο λέξεων αν χρειαστεί */
+    }
+
+    /* 3. Προσαρμογή κουμπιού "My News" */
+    .header-left .app-logo {
+        font-size: 1rem;
+        padding: 6px 12px;
+        flex-shrink: 0;         /* Απαγόρευση συρρίκνωσης του κουμπιού */
+    }
+
+    /* 4. Αναζήτηση και κουμπιά */
+    .search-row {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
     .search-box {
         width: 100%;
-        max-width: 500px;
+        max-width: none;
     }
+
     .show-selected-btn {
         width: 100%;
-        max-width: 500px;
-        height: 45px; /* Σταθερό ύψος για κινητά */
+        height: 45px;
+        font-size: 0.9rem;
     }
-    .submit-btn {
-        position: static;
-        margin-top: 15px;
-        width: 100%;
-        max-width: 300px;
-    }
+
+    /* 5. Footer Fix */
     .selection-footer {
         flex-direction: column;
         padding: 20px;
+        gap: 15px;
+        height: auto;
+    }
+
+    .submit-btn {
+        position: static;
+        width: 100%;
     }
 }

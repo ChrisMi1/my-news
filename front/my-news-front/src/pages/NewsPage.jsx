@@ -94,6 +94,17 @@ function NewsPage({ onLogout, onEditSources }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [pageNumber, selectedSource]);
 
+  useEffect(() => {
+  
+  const interval = setInterval(() => {
+    if (pageNumber === 0) {
+      fetchArticles(pageNumber, selectedSource);
+    }
+  }, 100000); 
+
+  return () => clearInterval(interval);
+}, [pageNumber, selectedSource, currentToken]);
+
 
 
     const handleNext = () => setPageNumber(prev => prev + 1);

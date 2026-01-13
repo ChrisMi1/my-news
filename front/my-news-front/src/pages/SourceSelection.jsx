@@ -131,7 +131,18 @@ export default function SourceSelection({ isFirstTime = false }) {
         </aside>
         {isPanelOpen && <div className="panel-overlay" onClick={() => setIsPanelOpen(false)}></div>}
             <header className="selection-header">
-                <h2>{isFirstTime ? "Welcome! Select your news sources" : "Edit your news sources"}</h2>
+                <div className="header-top-row">
+        <div className="header-left">
+            <span 
+                className="app-logo clickable" 
+                onClick={() => navigate("/")}
+            >
+                📰 My News
+            </span>
+        </div>
+        <h2>{isFirstTime ? "Welcome! Select your news sources" : "Edit your news sources"}</h2>
+        <div className="header-placeholder"></div> 
+    </div>
                 <div className="search-row">
                 <div className="search-box">
                     <input

@@ -347,85 +347,79 @@ html, body {
 
 @media (max-width: 768px) {
     .app-header {
-        flex-direction: column;
-        padding: 1rem;
+        flex-direction: column; /* Διατηρούμε την κάθετη στοίχιση για να μπει το carousel από κάτω */
+        padding: 0.8rem 1rem;
         height: auto;
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
+    /* Δημιουργούμε μια εικονική "σειρά" για το πάνω μέρος του header */
+    .header-left, .header-right {
+        width: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Το My News τέρμα αριστερά */
+    .header-left {
+        justify-content: flex-start;
+        position: relative;
+    }
+
+    /* Τα κουμπιά Edit/Logout τέρμα δεξιά στην ίδια οριζόντια ευθεία με το Logo */
+    .header-right {
+        justify-content: flex-end;
+        position: absolute; /* Τα "κλειδώνουμε" δεξιά */
+        top: 0.8rem;
+        right: 1rem;
+        width: auto;
+        gap: 8px;
+    }
+
+    /* Προσαρμογή του Carousel για να πιάνει όλο το πλάτος κάτω από τα κουμπιά */
     .header-center {
         width: 100%;
         max-width: none;
+        margin-top: 0.5rem; /* Χώρος από την πάνω σειρά */
     }
-    
-    .header-right {
-        width: 100%;
-        justify-content: center;
-        gap: 15px;
+
+    .nav-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem; /* Μικραίνουμε λίγο τα κουμπιά για να χωράνε */
+        white-space: nowrap;
     }
 
     .news-page {
-        padding: 1rem 0.5rem; /* Λιγότερο περιθώριο στα πλάγια */
+        padding: 1rem 0.5rem;
     }
 
     .news-title {
         font-size: 1.6rem;
         margin-bottom: 1.5rem;
-        padding-left: 0.5rem;
     }
 
     .articles-grid {
-        grid-template-columns: 1fr; /* Μία στήλη για να έχουν πλάτος οι ειδήσεις */
+        grid-template-columns: 1fr;
         gap: 1.5rem;
     }
 
-    .article-card {
-        border-radius: 12px;
-        /* Αφαιρούμε το transform hover στα κινητά για καλύτερο scroll */
-    }
-
-    .article-card:hover {
-        transform: none;
-    }
-
     .article-image {
-        height: 200px; /* Μικρότερο ύψος για να μην πιάνει όλη την οθόνη */
-        object-fit: cover;
-    }
-
-    .article-body {
-        padding: 1.2rem;
+        height: 200px;
     }
 
     .article-title {
-        font-size: 1.15rem; /* Ελαφρώς μικρότερο font */
-        -webkit-line-clamp: 3; /* Επιτρέπουμε μια γραμμή παραπάνω στον τίτλο */
-    }
-
-    .article-description {
-        font-size: 0.9rem;
-        -webkit-line-clamp: 2; /* Λιγότερο κείμενο περιγραφής για εξοικονόμηση χώρου */
-    }
-    
-    .pagination {
-        gap: 0.8rem;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-    }
-
-    .pagination button {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
+        font-size: 1.15rem;
     }
 }
 
-/* Επιπλέον διόρθωση για πολύ μικρά κινητά */
+/* Διορθώσεις για πολύ μικρές οθόνες */
 @media (max-width: 480px) {
-    .article-image {
-        height: 180px;
+    .header-left .app-logo {
+        font-size: 1.1rem; /* Μικραίνουμε το logo για να μην πέσει πάνω στα κουμπιά */
     }
     
-    .app-logo {
-        font-size: 1.3rem;
+    .nav-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
     }
 }

@@ -4,7 +4,7 @@ html, body {
     padding: 0;
 }
 
-/* Background */
+
 .login-wrapper {
     min-height: 100vh;
     width: 100%;
@@ -16,16 +16,16 @@ html, body {
     font-family: 'Inter', sans-serif;
 }
 
-/* Card */
+
 .login-card {
     background: rgba(255, 255, 255, 0.08);
-    padding: 2rem; /* Μείωση padding για να χωράει σε κινητά */
+    padding: 2rem; 
     border-radius: 20px;
     backdrop-filter: blur(18px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     text-align: center;
-    width: 90%;      /* Πιάνει το 90% της οθόνης σε μικρά κινητά */
-    max-width: 400px; /* Δεν μεγαλώνει παραπάνω από αυτό */
+    width: 90%;      
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,20 +47,20 @@ html, body {
 
 .icons-container {
     display: flex;
-    gap: 25px; /* Μεγαλύτερο κενό για να φαίνονται καθαρά σε mobile */
+    gap: 25px;
     justify-content: center;
     align-items: center;
     margin-top: 5px;
     width: 100%;
 }
 
-/* Microsoft Icon Button */
+
 .ms-icon-btn {
     background: white;
-    border: 1px solid #dadce0; /* Το χρώμα της Google */
+    border: 1px solid #dadce0; 
     width: 40px;
     height: 40px;
-    min-width: 40px; /* Κλείδωμα μεγέθους */
+    min-width: 40px; 
     min-height: 40px;
     border-radius: 50%;
     display: flex;
@@ -78,7 +78,7 @@ html, body {
 }
 
 .ms-logo-icon {
-    width: 18px; /* Λίγο μικρότερο για να "αναπνέει" μέσα στον κύκλο */
+    width: 18px; 
     height: 18px;
     object-fit: contain;
 }
@@ -92,7 +92,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Εξαφανίζει τυχόν περίεργα περιθώρια του Google iframe */
+    
     overflow: hidden; 
 }
 

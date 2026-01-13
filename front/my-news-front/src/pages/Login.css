@@ -19,12 +19,16 @@ html, body {
 /* Card */
 .login-card {
     background: rgba(255, 255, 255, 0.08);
-    padding: 3rem 4rem;
+    padding: 2rem; /* Μείωση padding για να χωράει σε κινητά */
     border-radius: 20px;
     backdrop-filter: blur(18px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     text-align: center;
-    max-width: 420px;
+    width: 90%;      /* Πιάνει το 90% της οθόνης σε μικρά κινητά */
+    max-width: 400px; /* Δεν μεγαλώνει παραπάνω από αυτό */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Title */
@@ -41,31 +45,73 @@ html, body {
     color: #cbd5e1;
 }
 
-/* Microsoft Login Button */
-.ms-login-btn {
-    background: #ffffff;
-    color: #1a73e8;
-    border: 2px solid #1a73e8;
-    padding: 0.9rem 1.3rem;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    cursor: pointer;
+.icons-container {
+    display: flex;
+    gap: 25px; /* Μεγαλύτερο κενό για να φαίνονται καθαρά σε mobile */
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    width: 100%;
+}
+
+/* Microsoft Icon Button */
+.ms-icon-btn {
+    background: white;
+    border: 1px solid #dadce0; /* Το χρώμα της Google */
+    width: 40px;
+    height: 40px;
+    min-width: 40px; /* Κλείδωμα μεγέθους */
+    min-height: 40px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    width: 100%;
-    transition: 0.25s ease;
-    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.ms-login-btn:hover {
-    background: #1a73e8;
-    color: white;
+.ms-icon-btn:hover {
+    background: #f8f9fa;
+    border-color: #d2d2d2;
 }
 
-/* Logo */
-.ms-logo {
-    width: 22px;
-    height: 22px;
+.ms-logo-icon {
+    width: 18px; /* Λίγο μικρότερο για να "αναπνέει" μέσα στον κύκλο */
+    height: 18px;
+    object-fit: contain;
+}
+
+/* Google Wrapper */
+.google-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Εξαφανίζει τυχόν περίεργα περιθώρια του Google iframe */
+    overflow: hidden; 
+}
+
+/* Ετικέτα "Sign in with" */
+.login-label {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile Fixes */
+@media (max-width: 400px) {
+    .login-card {
+        padding: 2rem 1.5rem;
+    }
+    .app-title {
+        font-size: 2.2rem;
+    }
 }

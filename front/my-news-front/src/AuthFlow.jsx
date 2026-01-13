@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { useMsal } from "@azure/msal-react";
 import { acquireToken } from "./authUtils";
 import { useNavigate } from "react-router-dom";
+import { googleLogout } from "@react-oauth/google";
 
 const AuthContext = createContext();
 
@@ -9,11 +10,31 @@ export const AuthProvider = ({ children }) => {
     const { instance, accounts } = useMsal();
     const navigate = useNavigate();
     const [token, setToken] = useState(null);
+    const [provider, setProviderState] = useState(localStorage.getItem("auth_provider"));
     const [userState, setUserState] = useState({ status: "loading", user: null });
+    
+
+    
+
+    const setProvider = (p) => {
+        setProviderState(p);
+        if (p) localStorage.setItem("auth_provider", p);
+        else localStorage.removeItem("auth_provider");
+    };
 
     const logout = useCallback(() => {
-        instance.logoutRedirect();
-    }, [instance]);
+        setToken(null);
+        setProvider(null);
+        setUserState({ status: "unauthenticated", user: null });
+        
+        if (provider === "microsoft") {
+            instance.logoutRedirect();
+        } else {
+            googleLogout();
+            setToken(null);
+            setUserState({ status: "unauthenticated", user: null });
+        }
+    }, [instance, provider]);
 
    
     const refreshToken = useCallback(async () => {
@@ -25,6 +46,11 @@ export const AuthProvider = ({ children }) => {
         logout();
         return null;
     }, [instance, accounts, logout]);
+
+    const handleGoogleSuccess = (credentialResponse) => {
+        const idToken = credentialResponse.credential;
+        setToken(idToken);
+    };
 
     
     useEffect(() => {
@@ -40,7 +66,8 @@ export const AuthProvider = ({ children }) => {
 
     
     useEffect(() => {
-        if (!token || !accounts.length) return;
+        if (!token) return;
+        if (provider === "microsoft" && accounts.length === 0) return;
 
         const checkUser = async () => {
             try {
@@ -49,7 +76,7 @@ export const AuthProvider = ({ children }) => {
                 });
 
                 if (res.status === 401) {
-                    await refreshToken();
+                    
                     return;
                 }
 
@@ -57,7 +84,8 @@ export const AuthProvider = ({ children }) => {
                 if (data.exists) {
                     setUserState({ status: "existing", user: data.user });
                 } else {
-                    setUserState({ status: "new", user: { email: accounts[0].username } });
+                    const email = provider === "microsoft" ? accounts[0].username : 'gmail';
+                    setUserState({ status: "new", user: { email: email } });
                     navigate("/create-user");
                 }
             } catch (e) {
@@ -68,7 +96,7 @@ export const AuthProvider = ({ children }) => {
     }, [token, accounts, navigate, refreshToken]);
 
     return (
-        <AuthContext.Provider value={{ token, userState, logout, refreshToken }}>
+        <AuthContext.Provider value={{ token, userState, logout, setProvider,refreshToken,handleGoogleSuccess }}>
             {children}
         </AuthContext.Provider>
     );

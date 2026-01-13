@@ -6,17 +6,18 @@ import NewsPage from "./pages/NewsPage";
 import SourceSelection from "./pages/SourceSelection";
 
 function AppRoutes() {
-    const { userState } = useAuth();
+    const { userState, token } = useAuth();
 
     if (userState.status === "unauthenticated") return <Login />;
     if (userState.status === "loading") return <div className="loader">Loading...</div>;
     if (userState.status === "error") return <div>Something went wrong. Please login again.</div>;
-
+    if (userState.status === "new") {
+        return <CreateUser user={userState.user} token={token} />;
+    }
     return (
         <Routes>
             <Route path="/" element={<NewsPage />} />
             <Route path="/edit-sources" element={<SourceSelection />} />
-            <Route path="/create-user" element={<CreateUser />} />
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );

@@ -1,31 +1,54 @@
 import React from "react";
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../authConfig";
-import "./Login.css"; // ⬅️ σημαντικό
+import "./Login.css"; 
+import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "../AuthFlow";
 
 const Login = () => {
     const { instance } = useMsal();
-
+    const { handleGoogleSuccess, setProvider } = useAuth();
     const handleLogin = () => {
+        setProvider("microsoft");
         instance.loginRedirect(loginRequest);
+    };
+
+    const handleGoogleLoginSuccess = (res) => {
+        setProvider("google");
+        handleGoogleSuccess(res);
     };
 
     return (
         <div className="login-wrapper">
             <div className="login-card">
                 <h1 className="app-title">My News</h1>
-                <p className="subtitle">
-                    Your personalized news aggregator
-                </p>
+                <p className="subtitle">Your personalized news aggregator</p>
 
-                <button className="ms-login-btn" onClick={handleLogin}>
-                    <img
-                        src="src/assets/microsoft.png"
-                        alt="Microsoft"
-                        className="ms-logo"
-                    />
-                    Sign in with Microsoft
-                </button>
+                <p className="login-label">Sign in with</p>
+
+                <div className="icons-container">
+                    {/* Microsoft Button */}
+                    <button className="ms-icon-btn" onClick={handleLogin} title="Sign in with Microsoft">
+                        <img
+                            src="src/assets/microsoft.png"
+                            alt="Microsoft"
+                            className="ms-logo-icon"
+                        />
+                    </button>
+
+                    {/* Google Button Wrapper */}
+                    <div className="google-icon-wrapper">
+                        <GoogleLogin 
+                            onSuccess={(res) => handleGoogleSuccess(res)} 
+                            onError={() => console.log("Login Failed")}
+                            type="icon"
+                            shape="circle"
+                            theme="outline"
+                            size="large"
+                            useOneTap={false}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );

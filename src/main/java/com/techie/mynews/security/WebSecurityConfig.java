@@ -34,8 +34,11 @@ public class WebSecurityConfig {
     JwtIssuerAuthenticationManagerResolver authenticationManagerResolver =
             new JwtIssuerAuthenticationManagerResolver(authenticationManagers::get);
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuerURL;
+    @Value("${spring.security.oauth2.resourceserver.jwt.microsoft.issuer-uri}")
+    private String microsoftIssuerUri;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.google.issuer-uri}")
+    private String googleIssuerUri;
     public WebSecurityConfig(AuthEntryPointJwt unauthorizedHandler) {
         this.unauthorizedHandler = unauthorizedHandler;
     }
@@ -53,7 +56,8 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        addManager(authenticationManagers, issuerURL);
+        addManager(authenticationManagers, microsoftIssuerUri);
+        addManager(authenticationManagers, googleIssuerUri);
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))

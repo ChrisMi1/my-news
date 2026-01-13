@@ -20,9 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -89,10 +87,6 @@ public class UserService {
         return userSourceResponses;
     }
 
-    private Boolean isTheCombinationUserAndSourceAlreadyExists(User user, List<Source> sources) {
-        return sources.stream().anyMatch(source -> userSourceRepository.existsByUser_IdAndSource_Id(user.getId(),source.getId()));
-    }
-
     private List<UserSource> createUserSources(User user, List<Source> sources) {
         return sources.stream().map(source ->
         {
@@ -150,6 +144,7 @@ public class UserService {
         }
 
         User user = saveUser(email);
+        log.info("User with email: " + user.getEmail() + " saved successfully!");
         return userMapper.entityToResponse(user);
     }
 

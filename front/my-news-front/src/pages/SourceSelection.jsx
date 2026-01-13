@@ -117,7 +117,7 @@ export default function SourceSelection({ isFirstTime = false }) {
            <aside className={`selected-summary-panel ${isPanelOpen ? 'visible' : ''}`}>
             <div className="summary-header">
                 <h4>Selected Sources ({selectedSources.length})</h4>
-                {/* Κουμπί για κλείσιμο μέσα στο πάνελ */}
+                
                 <button className="close-panel-btn" onClick={() => setIsPanelOpen(false)}>×</button>
             </div>
             <div className="summary-list">
@@ -186,7 +186,7 @@ export default function SourceSelection({ isFirstTime = false }) {
                 
                 <button 
                     className="submit-btn" 
-                    disabled={selectedSources.length === 0}
+                    // disabled={selectedSources.length === 0}
                     onClick={handleSubmit}
                 >
                     Save Changes

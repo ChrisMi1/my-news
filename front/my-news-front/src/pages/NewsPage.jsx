@@ -117,7 +117,12 @@ function NewsPage({ onLogout, onEditSources }) {
     <div className="news-page-container">
       <header className="app-header">
         <div className="header-left">
-          <span className="app-logo">📰 My News</span>
+          <span 
+          className="app-logo clickable" 
+          onClick={() => handleSourceChange("all")}
+        >
+          📰 My News
+        </span>
         </div>
 
         <div className="header-center">
@@ -164,54 +169,79 @@ function NewsPage({ onLogout, onEditSources }) {
 
       
       <main className="news-page">
-        <h1 className="news-title">Latest News</h1>
-
-        {loading && <div className="loading">Loading articles…</div>}
-        {error && <div className="error">{error}</div>}
-
-        <div className="articles-grid">
-          {articles.map((article, i) => (
-            <a
-              key={i}
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="article-card"
+      {/* Έλεγχος αν υπάρχουν πηγές */}
+      {userSources.length === 0 && !loading ? (
+        <div className="empty-sources-container">
+          <div className="empty-sources-content">
+            <div className="empty-icon">📂</div>
+            <h2>No sources found</h2>
+            <p>You haven't added any news sources yet. Start following some to see the latest news!</p>
+            <button 
+              onClick={() => navigate("/edit-sources")} 
+              className="add-sources-btn"
             >
-              <div className="article-image-container">
-                {article.urlToImage ? (
-                  <img src={article.urlToImage} alt={article.title} className="article-image" />
-                ) : (
-                  <div className="article-image placeholder">No Image</div>
-                )}
-              </div>
-
-              <div className="article-body">
-                <span className="article-source">{article.sourceName}</span>
-                <h3 className="article-title">{article.title}</h3>
-                <p className="article-description">{article.description || article.content}</p>
-                <span className="article-date">
-                  {new Date(article.publishedAt).toLocaleString("el-GR", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </div>
-            </a>
-          ))}
-        </div>
-
-        
-        {!loading && articles.length > 0 && (
-          <div className="pagination-wrapper">
-            <div className="pagination">
-              <button onClick={handlePrev} disabled={pageNumber === 0}>Previous</button>
-              <span>Page {pageNumber + 1} of {totalPages}</span>
-              <button onClick={handleNext} disabled={pageNumber + 1 >= totalPages}>Next</button>
-            </div>
+              + Add Sources
+            </button>
           </div>
-        )}
-      </main>
+        </div>
+      ) : (
+        <>
+          <h1 className="news-title">Latest News</h1>
+
+          {loading && <div className="loading">Loading articles…</div>}
+          {error && <div className="error">{error}</div>}
+          {!loading && !error && articles.length === 0 ? (
+        <div className="no-articles-message">
+          <div className="no-articles-icon">🗞️</div>
+          <h3>No articles found</h3>
+          <p>It seems there are no news stories for this source at the moment. Please try another source or check back later.</p>
+        </div>
+      ) : (
+          <div className="articles-grid">
+            {articles.map((article, i) => (
+              <a
+                key={i}
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="article-card"
+              >
+                <div className="article-image-container">
+                  {article.urlToImage ? (
+                    <img src={article.urlToImage} alt={article.title} className="article-image" />
+                  ) : (
+                    <div className="article-image placeholder">No Image</div>
+                  )}
+                </div>
+
+                <div className="article-body">
+                  <span className="article-source">{article.sourceName}</span>
+                  <h3 className="article-title">{article.title}</h3>
+                  <p className="article-description">{article.description || article.content}</p>
+                  <span className="article-date">
+                    {new Date(article.publishedAt).toLocaleString("el-GR", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+          )}
+
+          {!loading && articles.length > 0 && (
+            <div className="pagination-wrapper">
+              <div className="pagination">
+                <button onClick={handlePrev} disabled={pageNumber === 0}>Previous</button>
+                <span>Page {pageNumber + 1} of {totalPages}</span>
+                <button onClick={handleNext} disabled={pageNumber + 1 >= totalPages}>Next</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </main>
     </div>
   );
 }

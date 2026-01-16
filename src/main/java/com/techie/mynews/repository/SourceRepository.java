@@ -12,7 +12,6 @@ public interface SourceRepository extends JpaRepository<Source,Integer>, JpaSpec
     @NativeQuery("""
             SELECT DISTINCT s.external_id
             FROM sources s
-            JOIN user_sources us ON us.source_id = s.id
             """)
     List<String> findUniqueExternalIds();
 

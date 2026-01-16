@@ -4,12 +4,13 @@ import SourceSelection from "./SourceSelection.jsx";
 export default function CreateUser({ user, token }) {
 
     const [createdUser, setCreatedUser] = useState(null);
-    
+    const API_BASE = import.meta.env.VITE_API_URL;
+
 
     // 1. Create User
     useEffect(() => {
         const createUser = async () => {
-            const res = await fetch("http://localhost:8080/mynews/api/users", {
+            const res = await fetch(`${API_BASE}/mynews/api/users`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

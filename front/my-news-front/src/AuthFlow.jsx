@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [provider, setProviderState] = useState(localStorage.getItem("auth_provider"));
     const [userState, setUserState] = useState({ status: "loading", user: null });
-    
+    const API_BASE = import.meta.env.VITE_API_URL;
 
     
 
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
 
         const checkUser = async () => {
             try {
-                const res = await fetch("http://localhost:8080/mynews/api/users/check", {
+                const res = await fetch(`${API_BASE}/mynews/api/users/check`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

@@ -16,19 +16,18 @@
     margin-bottom: 5px;
 }
 
-/* Στυλ για το λογότυπο (ίδιο με το NewsPage) */
+
 .header-left .app-logo {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px 18px;
-    /* Χρήση Slate/Grey-Blue για να μην μπερδεύεται με το μπλε των πηγών */
     background: rgba(248, 250, 252, 0.05); 
     border: 1px solid rgba(248, 250, 252, 0.2); 
     border-radius: 12px;
     font-size: 1.2rem;
     font-weight: bold;
-    color: #f8fafc; /* Καθαρό λευκό/γκρι */
+    color: #f8fafc; 
     white-space: nowrap;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -46,9 +45,9 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 
-/* Placeholder για να κεντραριστεί ο τίτλος <h2> */
+
 .header-placeholder {
-    width: 150px; /* Προσαρμόστε το ώστε να είναι ίσο με το πλάτος του logo */
+    width: 150px; 
 }
 /* Header Section */
 .selection-header {
@@ -69,10 +68,10 @@
 .search-row {
     display: flex;
     align-items: stretch;
-    justify-content: center; /* Κεντράρει τα περιεχόμενα οριζόντια */
+    justify-content: center; 
     gap: 15px;
     width: 100%;
-    max-width: 850px; /* Περιορίζουμε το συνολικό πλάτος της σειράς */
+    max-width: 850px; 
 }
 
 .search-box {
@@ -93,7 +92,7 @@
     transition: all 0.3s ease;
 }
 
-/* Το κουμπί "Show selected sources" */
+
 .show-selected-btn {
     display: flex;
     align-items: center;
@@ -128,11 +127,11 @@
 
 .sources-grid {
     display: grid;
-    /* grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); */
+    
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    /* grid-auto-rows: 280px;  */
+    
     grid-auto-rows: min-content;
-    /* gap: 2rem; */
+    
     gap: 1.5rem;
     width: 100%;
     max-width: 1400px; 
@@ -341,41 +340,40 @@
 }
 /* Responsiveness */
 @media (max-width: 850px) {
-    /* 1. Επιτρέπουμε στα στοιχεία να αναπνεύσουν */
+    
     .header-top-row {
         flex-direction: row; 
         justify-content: flex-start;
-        align-items: flex-start; /* Στοίχιση στην κορυφή αν ο τίτλος έχει πολλές γραμμές */
+        align-items: flex-start; 
         gap: 12px;
         margin-bottom: 15px;
         width: 100%;
-        flex-wrap: nowrap; /* Διατήρηση στην ίδια σειρά με το κουμπί */
+        flex-wrap: nowrap; 
     }
 
     .header-placeholder {
         display: none;
     }
 
-    /* 2. Διόρθωση τίτλου για να ΜΗΝ κόβεται */
+    
     .selection-header h2 {
-        font-size: 1.1rem;      /* Ελαφρώς μικρότερο μέγεθος */
+        font-size: 1.1rem;     
         text-align: left;
         margin: 0;
         flex: 1;
-        white-space: normal;    /* ΕΠΙΤΡΕΠΟΥΜΕ την αλλαγή γραμμής */
-        overflow: visible;      /* Εμφάνιση όλου του κειμένου */
-        line-height: 1.3;       /* Καλή απόσταση μεταξύ των γραμμών */
-        word-break: break-word; /* Σπάσιμο λέξεων αν χρειαστεί */
+        white-space: normal;    
+        overflow: visible;      
+        line-height: 1.3;       
+        word-break: break-word; 
     }
 
-    /* 3. Προσαρμογή κουμπιού "My News" */
+    
     .header-left .app-logo {
         font-size: 1rem;
         padding: 6px 12px;
-        flex-shrink: 0;         /* Απαγόρευση συρρίκνωσης του κουμπιού */
+        flex-shrink: 0;         
     }
 
-    /* 4. Αναζήτηση και κουμπιά */
     .search-row {
         flex-direction: column;
         width: 100%;
@@ -393,7 +391,6 @@
         font-size: 0.9rem;
     }
 
-    /* 5. Footer Fix */
     .selection-footer {
         flex-direction: column;
         padding: 20px;

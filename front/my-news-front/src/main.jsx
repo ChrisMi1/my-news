@@ -11,7 +11,7 @@ const msalInstance = new PublicClientApplication(msalConfig);
 // Initialize before rendering
 msalInstance.initialize().then(() => {
     createRoot(document.getElementById("root")).render(
-        <GoogleOAuthProvider clientId={'713573000206-hp730dr0cj3eqsuq5fbnococ52dvkl61.apps.googleusercontent.com'}>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
             <MsalProvider instance={msalInstance}>
                 <BrowserRouter>
                     <App />

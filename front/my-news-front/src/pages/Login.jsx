@@ -27,7 +27,7 @@ const Login = () => {
                 <p className="login-label">Sign in with</p>
 
                 <div className="icons-container">
-                    {/* Microsoft Button */}
+                    
                     <button className="ms-icon-btn" onClick={handleLogin} title="Sign in with Microsoft">
                         <img
                             src="src/assets/microsoft.png"
@@ -36,7 +36,7 @@ const Login = () => {
                         />
                     </button>
 
-                    {/* Google Button Wrapper */}
+                    
                     <div className="google-icon-wrapper">
                         <GoogleLogin 
                             onSuccess={(res) => handleGoogleSuccess(res)} 

@@ -14,10 +14,11 @@ export default function SourceSelection({ isFirstTime = false }) {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const { token } = useAuth();
     const navigate = useNavigate();
-    
+    const API_BASE = import.meta.env.VITE_API_URL;
+
     const fetchUserSources = async () => {
         try {
-            const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
+            const res = await fetch(`${API_BASE}/mynews/api/users/sources`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             if (res.ok) {
@@ -33,7 +34,7 @@ export default function SourceSelection({ isFirstTime = false }) {
     const fetchSources = async (page, query = "") => {
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:8080/mynews/api/sources/search", {
+            const res = await fetch(`${API_BASE}/mynews/api/sources/search`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -93,7 +94,7 @@ export default function SourceSelection({ isFirstTime = false }) {
 
     const handleSubmit = async () => {
         try {
-            const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
+            const res = await fetch(`${API_BASE}/mynews/api/users/sources`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

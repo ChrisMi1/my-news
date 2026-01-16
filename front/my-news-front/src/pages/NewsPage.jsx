@@ -18,10 +18,11 @@ function NewsPage({ onLogout, onEditSources }) {
   const { token, logout, refreshToken } = useAuth();
   const [currentToken, setCurrentToken] = useState(token);
   const navigate = useNavigate();
-  
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const fetchUserSources = async () => {
     try {
-      const res = await fetch("http://localhost:8080/mynews/api/users/sources", {
+      const res = await fetch(`${API_BASE}/mynews/api/users/sources`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -44,7 +45,7 @@ function NewsPage({ onLogout, onEditSources }) {
           pageTotalContentSize: 6,
         });
       let res = await fetch(
-        "http://localhost:8080/mynews/api/articles/search",
+        `${API_BASE}/mynews/api/articles/search`,
         {
           method: "POST",
           headers: {
@@ -60,7 +61,7 @@ function NewsPage({ onLogout, onEditSources }) {
 
       if (newToken) {
         
-        res = await fetch("http://localhost:8080/mynews/api/articles/search", {
+        res = await fetch(`${API_BASE}/mynews/api/articles/search`, {
           method: "POST",
           headers: { 
               "Content-Type": "application/json", 
@@ -180,7 +181,7 @@ function NewsPage({ onLogout, onEditSources }) {
 
       
       <main className="news-page">
-      {/* Έλεγχος αν υπάρχουν πηγές */}
+      
       {userSources.length === 0 && !loading ? (
         <div className="empty-sources-container">
           <div className="empty-sources-content">

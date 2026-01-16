@@ -252,7 +252,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 60vh; /* Καταλαμβάνει το μεγαλύτερο μέρος της οθόνης */
+    min-height: 60vh; 
     text-align: center;
 }
 
@@ -282,7 +282,7 @@ html, body {
     line-height: 1.6;
 }
 
-/* Το κουμπί + Add Sources */
+
 .add-sources-btn {
     background: #3b82f6;
     color: white;
@@ -347,45 +347,45 @@ html, body {
 
 @media (max-width: 768px) {
     .app-header {
-        flex-direction: column; /* Διατηρούμε την κάθετη στοίχιση για να μπει το carousel από κάτω */
+        flex-direction: column; 
         padding: 0.8rem 1rem;
         height: auto;
         gap: 0.8rem;
     }
 
-    /* Δημιουργούμε μια εικονική "σειρά" για το πάνω μέρος του header */
+    
     .header-left, .header-right {
         width: 100%;
         display: flex;
         align-items: center;
     }
 
-    /* Το My News τέρμα αριστερά */
+    
     .header-left {
         justify-content: flex-start;
         position: relative;
     }
 
-    /* Τα κουμπιά Edit/Logout τέρμα δεξιά στην ίδια οριζόντια ευθεία με το Logo */
+    
     .header-right {
         justify-content: flex-end;
-        position: absolute; /* Τα "κλειδώνουμε" δεξιά */
+        position: absolute; 
         top: 0.8rem;
         right: 1rem;
         width: auto;
         gap: 8px;
     }
 
-    /* Προσαρμογή του Carousel για να πιάνει όλο το πλάτος κάτω από τα κουμπιά */
+    
     .header-center {
         width: 100%;
         max-width: none;
-        margin-top: 0.5rem; /* Χώρος από την πάνω σειρά */
+        margin-top: 0.5rem; 
     }
 
     .nav-btn {
         padding: 0.4rem 0.6rem;
-        font-size: 0.75rem; /* Μικραίνουμε λίγο τα κουμπιά για να χωράνε */
+        font-size: 0.75rem; 
         white-space: nowrap;
     }
 
@@ -412,10 +412,10 @@ html, body {
     }
 }
 
-/* Διορθώσεις για πολύ μικρές οθόνες */
+
 @media (max-width: 480px) {
     .header-left .app-logo {
-        font-size: 1.1rem; /* Μικραίνουμε το logo για να μην πέσει πάνω στα κουμπιά */
+        font-size: 1.1rem; 
     }
     
     .nav-btn {

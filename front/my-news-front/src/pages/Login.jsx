@@ -4,7 +4,7 @@ import { loginRequest } from "../authConfig";
 import "./Login.css"; 
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../AuthFlow";
-
+import MicrosoftIcon from '../assets/microsoft.png';
 const Login = () => {
     const { instance } = useMsal();
     const { handleGoogleSuccess, setProvider } = useAuth();
@@ -30,7 +30,7 @@ const Login = () => {
                     
                     <button className="ms-icon-btn" onClick={handleLogin} title="Sign in with Microsoft">
                         <img
-                            src="src/assets/microsoft.png"
+                            src={MicrosoftIcon}
                             alt="Microsoft"
                             className="ms-logo-icon"
                         />

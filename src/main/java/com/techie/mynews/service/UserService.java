@@ -20,9 +20,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,12 +30,15 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 public class UserService {
+
     private final UserRepository userRepository;
     private final SourceRepository sourceRepository;
     private final UserSourceRepository userSourceRepository;
     private final UserSourceMapper userSourceMapper;
     private final UserMapper userMapper;
     private final SourceMapper sourceMapper;
+
+    @Transactional
     public List<UserSourceResponse> saveSources(UserSourceRequest userSourceRequest) {
         String email = getEmail();
 
@@ -49,65 +52,54 @@ public class UserService {
     }
 
     private List<UserSourceResponse> updateUserSources(User user, UserSourceRequest userSourceRequest) {
-        List<UserSourceResponse> userSourceResponses = new ArrayList<>();
+        Set<Integer> targetSourceIds = new HashSet<>(
+                userSourceRequest.getSourcesIds() != null ? userSourceRequest.getSourcesIds() : List.of()
+        );
 
-        Map<Integer,Source> updatedSources = mapSourceIdsToSources(userSourceRequest.getSourcesIds())
-                .stream()
-                .collect(Collectors.toMap(Source::getId, Function.identity()));
+        //Identify which UserSource entities must be removed
+        List<UserSource> toRemove = user.getUserSources().stream()
+                .filter(us -> !targetSourceIds.contains(us.getSource().getId()))
+                .toList();
 
-        Map<Integer,Source> existedSources = user.getSources()
-                .stream()
-                .collect(Collectors.toMap(Source::getId, Function.identity()));
+        //Identify which source IDs need to be added
+        Set<Integer> currentSourceIds = user.getUserSources().stream()
+                .map(us -> us.getSource().getId())
+                .collect(Collectors.toSet());
 
-        List<Integer> removedSources = new ArrayList<>();
-        //Check if the source id that we found in db exists also in the updated list. If not then we have to remove it from db.
-        //If we found it then we can delete it from the updated list as it is already exists in db
-        for (Integer exitedId : existedSources.keySet()) {
-            if (!updatedSources.containsKey(exitedId)) {
-                removedSources.add(exitedId);
-            } else {
-                updatedSources.remove(exitedId);
+        Set<Integer> idsToAdd = targetSourceIds.stream()
+                .filter(id -> !currentSourceIds.contains(id))
+                .collect(Collectors.toSet());
+
+        //Apply Removals
+        for (UserSource us : toRemove) {
+            user.getUserSources().remove(us);
+        }
+
+        //Apply Additions
+        List<UserSource> toAdd = new ArrayList<>();
+        if (!idsToAdd.isEmpty()) {
+            List<Source> sourcesToAttach = sourceRepository.findAllById(idsToAdd);
+            for (Source source : sourcesToAttach) {
+                UserSource newLink = new UserSource();
+                newLink.setUser(user);
+                newLink.setSource(source);
+                user.getUserSources().add(newLink);
+                toAdd.add(newLink);
             }
         }
-        List<Source> addedSources = updatedSources.values().stream().toList();
 
-        if (!removedSources.isEmpty()) {
-            log.info("User with email: " + user.getEmail() + " remove " + removedSources.size() + " sources.");
-            List<UserSource> removedUserSources = getDeletedUserSources(user,removedSources);
-            userSourceRepository.deleteAll(removedUserSources);
-            userSourceResponses.addAll(userSourceMapper.toUserSourceResponseList(removedUserSources,"DELETED"));
+        //Build DTO Responses
+        List<UserSourceResponse> responses = new ArrayList<>();
+        if (!toRemove.isEmpty()) {
+            log.info("User {} removed {} sources.", user.getEmail(), toRemove.size());
+            responses.addAll(userSourceMapper.toUserSourceResponseList(toRemove, "DELETED"));
+        }
+        if (!toAdd.isEmpty()) {
+            log.info("User {} added {} sources.", user.getEmail(), toAdd.size());
+            responses.addAll(userSourceMapper.toUserSourceResponseList(toAdd, "ADDED"));
         }
 
-        if (!addedSources.isEmpty()) {
-            log.info("User with email: " + user.getEmail() + " add " + addedSources.size() + " sources.");
-            List<UserSource> addedUserSources = createUserSources(user,addedSources);
-            userSourceResponses.addAll(userSourceMapper.toUserSourceResponseList(userSourceRepository.saveAll(addedUserSources),"ADDED"));
-        }
-
-        return userSourceResponses;
-    }
-
-    private List<UserSource> createUserSources(User user, List<Source> sources) {
-        return sources.stream().map(source ->
-        {
-            UserSource userSource = new UserSource();
-
-            userSource.setUser(user);
-            userSource.setSource(source);
-            return userSource;
-        })
-        .collect(Collectors.toList());
-    }
-
-    private List<UserSource> getDeletedUserSources(User user, List<Integer> sources) {
-        return userSourceRepository.findAllByUserIdAndSourceIds(user.getId(),sources);
-    }
-
-
-    private List<Source> mapSourceIdsToSources(List<Integer> sourcesIds)  {
-        return sourcesIds.stream().map(sourceId -> sourceRepository.findById(sourceId)
-                        .orElseThrow(() -> new MyNewsException(HttpStatus.BAD_REQUEST,"Source with id " + sourceId + " not found.")))
-                .collect(Collectors.toList());
+        return responses;
     }
 
     private User saveUser(String email) {
@@ -156,6 +148,11 @@ public class UserService {
 
     public List<SourceResponse> getSelectedSourcesByUser() {
         User user = userRepository.findUserByEmail(getEmail());
-        return sourceMapper.toSourceResponseList(user.getSources());
+
+        List<Source> sources = user.getUserSources().stream()
+                .map(UserSource::getSource)
+                .toList();
+
+        return sourceMapper.toSourceResponseList(sources);
     }
 }

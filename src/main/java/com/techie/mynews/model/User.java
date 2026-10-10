@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -22,9 +21,32 @@ public class User extends BaseEntity {
     @Column(name = "user_email",length = 500)
     private String email;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_sources", joinColumns = {
-            @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
-            @JoinColumn(name = "source_id", referencedColumnName = "id") })
-    private List<Source> sources;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserSource> userSources = new HashSet<>();
+
+    public void addSource(Source source) {
+        UserSource userSource = new UserSource();
+        userSource.setUser(this);
+        userSource.setSource(source);
+
+        this.userSources.add(userSource);
+    }
+
+    public void removeSource(Source source) {
+        this.userSources.removeIf(us -> us.getSource().equals(source));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof User user)) return false;
+
+        return Objects.equals(user.getEmail(), this.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEmail());
+    }
 }

@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,6 +30,20 @@ public class Source extends BaseEntity{
     private String language;
     @Column(name = "country")
     private String country;
-    @OneToMany(mappedBy = "source",fetch = FetchType.LAZY)
-    private List<UserSource> userSources;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "source")
+    private Set<UserSource> userSources = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Source source)) return false;
+
+        return Objects.equals(source.getExternalId(), this.getExternalId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getExternalId());
+    }
 }

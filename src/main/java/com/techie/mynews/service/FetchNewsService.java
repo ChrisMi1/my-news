@@ -19,6 +19,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -31,6 +33,9 @@ public class FetchNewsService {
     private final NewsApiClient newsApiClient;
     private final ArticleRepository articleRepository;
     private final Executor executor;
+    private final ArticleService articleService;
+    private static final int BATCH_SIZE = 5;
+
     public void fetchAndStoreNews() {
         List<String> externalIdList = sourceRepository.findUniqueExternalIds();
 
@@ -39,42 +44,63 @@ public class FetchNewsService {
             return;
         }
 
-        List<List<String>> batchesOfSources = partitionArray(externalIdList,5);
-        CompletableFuture<Void> future = fetchArticlesAsync(batchesOfSources);
-        future.join();
-    }
+        List<List<String>> batchesOfSources = partitionArray(externalIdList,BATCH_SIZE);
 
-    @Async("articleExecutor")
-    public CompletableFuture<Void> fetchArticlesAsync(List<List<String>> sources) {
-
-        List<CompletableFuture<Void>> futures = sources.stream()
-                .map(batch -> CompletableFuture.runAsync(() -> {
-                    String externalIds = String.join(",", batch);
-                    NewsApiResponse apiResponse = newsApiClient.fetchNewsFromNewsApi(externalIds);
-
-                    if (apiResponse != null) saveArticles(apiResponse);
-                }, executor))
+        List<CompletableFuture<Void>> pipelineFutures = batchesOfSources.stream()
+                .map(batch -> newsApiClient.fetchNewsFromNewsApi(String.join(",", batch))
+                        .thenAcceptAsync(apiResponse -> {
+                            if (apiResponse != null) {
+                                processApiResponse(apiResponse);
+                            }
+                        }, executor))
                 .toList();
 
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture.allOf(pipelineFutures.toArray(new CompletableFuture[0])).join();
     }
 
-    private void saveArticles(NewsApiResponse apiResponse) {
-        for (ArticleResponse articleResponse : apiResponse.getArticles()) {
-            if (articleRepository.existsByUrl(articleResponse.getUrl())) {
-                log.info("Article with url: " + articleResponse.getUrl() + " already fetched continue...");
-                continue;
-            }
-            log.info("Find source for external id: " + articleResponse.getSourceDto().getExternalId());
-            Source source = sourceRepository.findSourceByExternalId(articleResponse.getSourceDto().getExternalId());
-            Article article = mapArticleResponseToArticle(source, articleResponse);
-            try{
-                articleRepository.save(article);
-            } catch (DataIntegrityViolationException ex) {
-                log.info("Article already exists, skipping: " + article.getUrl());
+    private void processApiResponse(NewsApiResponse apiResponse) {
+        if (apiResponse == null || apiResponse.getArticles().isEmpty()) return;
+        log.info("Extract the incoming urls from news api response");
+        List<String> incomingUrls = apiResponse.getArticles().stream()
+                .map(ArticleResponse::getUrl)
+                .filter(StringUtils::isNotBlank)
+                .toList();
+        log.info("Extract the existing urls from db");
+        Set<String> existingUrls = articleRepository.findExistingUrls(incomingUrls);
+        log.info("Extract the sources by external ids from api response");
+        Set<String> sourceExternalIds = apiResponse.getArticles().stream()
+                .map(a -> a.getSourceDto().getExternalId())
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        log.info("Map every external id with the ref source");
+        Map<String, Source> sourceMap = sourceRepository.findByExternalIds(sourceExternalIds)
+                .stream()
+                .collect(Collectors.toMap(Source::getExternalId, s -> s));
+
+
+        List<Article> newArticles = new ArrayList<>();
+        log.info("Add in newArticles list only the urls that does not exist in our existingUrls set");
+
+        for (ArticleResponse dto : apiResponse.getArticles()) {
+            if (!existingUrls.contains(dto.getUrl())) {
+                Source source = sourceMap.get(dto.getSourceDto().getExternalId());
+                if (source == null) {
+                    log.info("No source found with external id = " + dto.getSourceDto().getExternalId());
+                    continue;
+                }
+                newArticles.add(mapArticleResponseToArticle(source, dto));
             }
         }
+
+        log.info("Found {} in the current batch. Starting the insertion", newArticles.size());
+        try {
+            articleService.persistArticleBatch(newArticles);
+            log.info("Successfully persisted batch of size {}", newArticles.size());
+        } catch (Exception ex) {
+            log.error("Failed to persist batch. Skipping and continuing to next batch.", ex);
+        }
     }
+
     private List<List<String>> partitionArray(List<String> externalIds,Integer size) {
         List<List<String>> parts = new ArrayList<>();
         for (int i = 0; i < externalIds.size(); i += size) {

@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+
 @Service
 @Slf4j
 public class NewsApiClient {
@@ -21,24 +24,24 @@ public class NewsApiClient {
         this.webClient = webClient;
     }
 
-    public NewsApiResponse fetchNewsFromNewsApi(String externalIds) {
-        log.info("Starting fetch news with externalIds: " + externalIds);
-        try{
-            NewsApiResponse response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/top-headlines")
-                            .queryParam("sources", externalIds)
-                            .queryParam("apiKey", apiKey)
-                            .build())
-                    .retrieve()
-                    .bodyToMono(NewsApiResponse.class)
-                    .block();
-            if (response == null || CollectionUtils.isEmpty(response.getArticles())) return null;
-            return response;
-        } catch (Exception ex) {
-            log.info("Unable to fetch news due to the following error: " + ex.getMessage());
-            return null;
-        }
+    public CompletableFuture<NewsApiResponse> fetchNewsFromNewsApi(String externalIds) {
+        log.info("Dispatching non-blocking HTTP request for sources: [{}]", externalIds);
+
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/top-headlines")
+                        .queryParam("sources", externalIds)
+                        .queryParam("apiKey", apiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(NewsApiResponse.class)
+                .timeout(Duration.ofSeconds(10))
+                .filter(response -> response != null && !CollectionUtils.isEmpty(response.getArticles()))
+                .toFuture()
+                .exceptionally(ex -> {
+                    log.error("HTTP call failed for sources [{}]: {}", externalIds, ex.getMessage());
+                    return null;
+                });
     }
 
 }

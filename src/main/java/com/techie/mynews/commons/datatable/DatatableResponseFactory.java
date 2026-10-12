@@ -12,6 +12,7 @@ public abstract class DatatableResponseFactory<C extends SearchCriteria,E> {
         searchResponse.setPageTotalContentSize(paginatedData.getSize());
         searchResponse.setSortCriteria(searchRequest.getSortCriteriaList());
         searchResponse.setSearchCriteria(searchRequest.getSearchCriteria());
+        searchResponse.setTotalElements(paginatedData.getTotalElements());
 
         return searchResponse;
     }

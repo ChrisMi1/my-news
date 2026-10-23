@@ -8,6 +8,7 @@ import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.service.UserService;
 import com.techie.mynews.utils.annotation.CurrentUserEmail;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,9 +24,9 @@ public class UserController {
         return ResponseEntity.ok().body(userService.checkIfUserExists(email));
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<UserResponse> create(@CurrentUserEmail String email) {
-        return ResponseEntity.ok().body(userService.create(email));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(email));
     }
 
     @PostMapping("/sources")

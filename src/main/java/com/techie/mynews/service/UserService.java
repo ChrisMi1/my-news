@@ -147,12 +147,14 @@ public class UserService {
         return userMapper.entityToResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public List<SourceResponse> getSelectedSourcesByUser(String email) {
         if (StringUtils.isEmpty(email)) {
             throw new MyNewsException(HttpStatus.NOT_FOUND,"No email found");
         }
 
-        User user = userRepository.findUserByEmail(email);
+        User user = userRepository.findUserWithSourcesByEmail(email)
+                .orElseThrow(() -> new MyNewsException(HttpStatus.NOT_FOUND, "User not found"));
 
         List<Source> sources = user.getUserSources().stream()
                 .map(UserSource::getSource)

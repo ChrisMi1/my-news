@@ -1,6 +1,5 @@
 package com.techie.mynews.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techie.mynews.dto.response.CheckUserResponse;
 import com.techie.mynews.dto.response.UserResponse;
 import com.techie.mynews.exception.MyNewsException;
@@ -14,10 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -93,4 +96,57 @@ public class UserControllerTest {
             verify(userService).checkIfUserExists(null);
         }
     }
+
+    @Nested
+    @DisplayName("POST api/users")
+    class CreateUserEndpointTests {
+
+        //Test for the happy path -> 201 created
+        @Test
+        @DisplayName("Should return 201 created when the email is new")
+        void check_whenUserIsNew_returns201() throws Exception {
+            String email = "example@email.com";
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId("1");
+            userResponse.setEmail("example@email.com");
+
+            given(userService.create(email)).willReturn(userResponse);
+
+            mockMvc.perform(post(BASE_URL)
+                    .with(jwt().jwt(jwt -> jwt.claim("email",email))))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value("1"))
+                    .andExpect(jsonPath("$.email").value(email));
+
+            verify(userService).create(email);
+        }
+
+        //Test for missing email -> 404 NOT FOUND
+        @Test
+        @DisplayName("Should return 404 when the email claim is missing")
+        void check_whenEmailClaimIsMissing_returns404() throws Exception {
+            given(userService.create(null)).willThrow((new MyNewsException(HttpStatus.NOT_FOUND, "No email found")));
+
+            mockMvc.perform(post(BASE_URL)
+                            .with(jwt().jwt(jwt -> jwt.subject("auth0|123456"))))
+                    .andExpect(status().isNotFound());
+
+            verify(userService).create(null);
+        }
+
+        //Test that email already exists in db-> 409 CONFLICT
+        @Test
+        @DisplayName("Should return 409 when the email already exists in db")
+        void check_whenEmailAlreadyExists_returns409() throws Exception {
+            String email = "example@email.com";
+            given(userService.create(email)).willThrow((new MyNewsException(HttpStatus.CONFLICT, String.format("User with email %s already exists",email))));
+
+            mockMvc.perform(post(BASE_URL)
+                            .with(jwt().jwt(jwt -> jwt.claim("email",email))))
+                    .andExpect(status().isConflict());
+
+            verify(userService).create(email);
+        }
+    }
+
 }

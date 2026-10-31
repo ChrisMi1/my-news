@@ -2,9 +2,8 @@ package com.techie.mynews.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class UserResponse {

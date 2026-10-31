@@ -1,7 +1,10 @@
 package com.techie.mynews.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techie.mynews.dto.request.UserSourceRequest;
 import com.techie.mynews.dto.response.CheckUserResponse;
 import com.techie.mynews.dto.response.UserResponse;
+import com.techie.mynews.dto.response.UserSourceResponse;
 import com.techie.mynews.exception.MyNewsException;
 import com.techie.mynews.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -13,11 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
-
+import java.util.List;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +33,9 @@ public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private UserService userService;
@@ -104,7 +110,7 @@ public class UserControllerTest {
         //Test for the happy path -> 201 created
         @Test
         @DisplayName("Should return 201 created when the email is new")
-        void check_whenUserIsNew_returns201() throws Exception {
+        void create_whenUserIsNew_returns201() throws Exception {
             String email = "example@email.com";
             UserResponse userResponse = new UserResponse();
             userResponse.setId("1");
@@ -147,6 +153,84 @@ public class UserControllerTest {
 
             verify(userService).create(email);
         }
+    }
+
+    @Nested
+    @DisplayName("POST /api/users/sources")
+    class SaveSourcesEndpointTests {
+
+        @Test
+        @DisplayName("Should return 200 OK with list of UserSourceResponse on valid request")
+        void saveSources_whenValidRequest_returns200() throws Exception {
+            String email = "example@email.com";
+            UserSourceRequest userSourceRequest = new UserSourceRequest();
+            UserSourceResponse item = new UserSourceResponse();
+            item.setId("source-1");
+            item.setAction("ADD");
+            List<UserSourceResponse> responseList = List.of(item);
+
+            given(userService.saveSources(any(UserSourceRequest.class), eq(email)))
+                    .willReturn(responseList);
+
+            mockMvc.perform(post(BASE_URL + "/sources")
+                    .with(jwt().jwt(jwt -> jwt.claim("email",email)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userSourceRequest))
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)))
+                    .andExpect(jsonPath("$[0].id").value("source-1"))
+                    .andExpect(jsonPath("$[0].action").value("ADD"));
+
+            verify(userService).saveSources(any(UserSourceRequest.class), eq(email));
+        }
+
+        @Test
+        @DisplayName("Should return 401 Unauthorized when no authentication token is provided")
+        void saveSources_unauthenticated_returns401() throws Exception {
+            UserSourceRequest request = new UserSourceRequest();
+
+            mockMvc.perform(post(BASE_URL + "/sources")
+                            .with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isUnauthorized());
+
+            verifyNoInteractions(userService);
+        }
+
+        @Test
+        @DisplayName("Should return 400 Bad Request when request body is missing")
+        void saveSources_whenMissingBody_returns400() throws Exception {
+            String email = "example@email.com";
+
+            mockMvc.perform(post(BASE_URL + "/sources")
+                            .with(jwt().jwt(jwt -> jwt.claim("email", email)))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(userService);
+        }
+
+        @Test
+        @DisplayName("Should return 400 Bad Request when user does not exist in service")
+        void saveSources_whenUserNotFoundInService_returns400() throws Exception {
+            String email = "notfound@email.com";
+            UserSourceRequest request = new UserSourceRequest();
+
+            given(userService.saveSources(any(UserSourceRequest.class), eq(email)))
+                    .willThrow(new MyNewsException(HttpStatus.BAD_REQUEST, "User with email " + email + " not found."));
+
+            mockMvc.perform(post(BASE_URL + "/sources")
+                            .with(jwt().jwt(jwt -> jwt.claim("email", email)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest());
+
+            verify(userService).saveSources(any(UserSourceRequest.class), eq(email));
+        }
+
+
     }
 
 }

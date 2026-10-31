@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 public class ExceptionHandler {
 
     @org.springframework.web.bind.annotation.ExceptionHandler(MyNewsException.class)
-    public ResponseEntity<String> handlePlnException(HttpServletRequest request, MyNewsException myNewsException) {
+    public ResponseEntity<String> handleMyNewsException(HttpServletRequest request, MyNewsException myNewsException) {
         return ResponseEntity.status(myNewsException.getStatusCode()).body(myNewsException.getMessage());
     }
 }

@@ -138,7 +138,7 @@ public class UserService {
             throw new MyNewsException(HttpStatus.NOT_FOUND,"No email found");
         }
 
-        if (userRepository.findUserByEmail(email) != null) {
+        if (userRepository.existsByEmail(email)) {
             throw new MyNewsException(HttpStatus.CONFLICT,String.format("User with email %s already exists",email));
         }
 
